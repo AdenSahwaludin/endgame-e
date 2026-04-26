@@ -100,10 +100,7 @@ async function handleSubmit() {
       />
     </div>
 
-    <UModal
-      v-model:open="showCreate"
-      :ui="{ overlay: 'backdrop-blur-sm bg-black/40 dark:bg-black/50' }"
-    >
+    <UModal v-model:open="showCreate">
       <template #content>
         <UCard>
           <template #header

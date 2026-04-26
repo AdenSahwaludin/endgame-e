@@ -6,6 +6,14 @@ const search = ref("");
 const page = ref(1);
 const statusFilter = ref("");
 
+watch(search, () => {
+  page.value = 1;
+});
+
+watch(statusFilter, () => {
+  page.value = 1;
+});
+
 const { data, refresh } = await useFetch("/api/unit-barang", {
   query: computed(() => ({
     search: search.value,

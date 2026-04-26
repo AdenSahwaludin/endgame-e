@@ -1,2 +1,57 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+button,
+[role="button"],
+a[href],
+summary,
+[data-slot="trigger"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+main table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+main table thead tr {
+  background: color-mix(
+    in oklab,
+    var(--ui-bg-elevated, #0f172a) 65%,
+    transparent
+  );
+}
+
+main table thead th {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+main table tbody tr {
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+main table tbody tr:hover {
+  background: color-mix(
+    in oklab,
+    var(--ui-bg-elevated, #0f172a) 45%,
+    transparent
+  );
+}
+
+main table tbody td,
+main table thead th {
+  vertical-align: middle;
+}
+
+[data-slot="overlay"][data-state="open"] {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

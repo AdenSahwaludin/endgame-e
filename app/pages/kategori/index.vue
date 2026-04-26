@@ -10,6 +10,10 @@ const editMode = ref(false);
 const form = ref({ kodeKategori: "", namaKategori: "", deskripsi: "" });
 const loading = ref(false);
 
+watch(search, () => {
+  page.value = 1;
+});
+
 const { data, refresh } = await useFetch("/api/kategori", {
   query: computed(() => ({
     search: search.value,
@@ -147,10 +151,7 @@ async function handleDelete(id: string) {
     </div>
 
     <!-- Modal Create/Edit -->
-    <UModal
-      v-model:open="showModal"
-      :ui="{ overlay: 'backdrop-blur-sm bg-black/40 dark:bg-black/50' }"
-    >
+    <UModal v-model:open="showModal">
       <template #content>
         <UCard>
           <template #header>

@@ -2,16 +2,26 @@
 definePageMeta({ layout: "admin", middleware: "auth" });
 const toast = useToast();
 const { canApprove, hasPermission } = usePermission();
+const search = ref("");
 const page = ref(1);
 const statusFilter = ref("");
 
+watch(search, () => {
+  page.value = 1;
+});
+
+watch(statusFilter, () => {
+  page.value = 1;
+});
+
 const { data, refresh } = await useFetch("/api/transaksi-keluar", {
   query: computed(() => ({
+    search: search.value,
     page: page.value,
     limit: 20,
     status: statusFilter.value,
   })),
-  watch: [page, statusFilter],
+  watch: [search, page, statusFilter],
 });
 
 const columns = [
@@ -75,17 +85,25 @@ async function handleReject(id: number) {
         >Tambah</UButton
       >
     </div>
-    <USelectMenu
-      v-model="statusFilter"
-      :items="[
-        { label: 'Semua', value: '' },
-        { label: 'Pending', value: 'pending' },
-        { label: 'Approved', value: 'approved' },
-        { label: 'Rejected', value: 'rejected' },
-      ]"
-      value-key="value"
-      class="w-40"
-    />
+    <div class="flex gap-3 flex-wrap">
+      <UInput
+        v-model="search"
+        placeholder="Cari kode transaksi / unit..."
+        icon="i-heroicons-magnifying-glass"
+        class="max-w-sm"
+      />
+      <USelectMenu
+        v-model="statusFilter"
+        :items="[
+          { label: 'Semua', value: '' },
+          { label: 'Pending', value: 'pending' },
+          { label: 'Approved', value: 'approved' },
+          { label: 'Rejected', value: 'rejected' },
+        ]"
+        value-key="value"
+        class="w-40"
+      />
+    </div>
 
     <UTable :data="data?.data || []" :columns="columns">
       <template #unit-cell="{ row }">{{
@@ -114,14 +132,14 @@ async function handleReject(id: number) {
         >
           <UButton
             icon="i-heroicons-check"
-            color="green"
+            color="success"
             variant="ghost"
             size="xs"
             @click="handleApprove(row.original.id)"
           />
           <UButton
             icon="i-heroicons-x-mark"
-            color="red"
+            color="error"
             variant="ghost"
             size="xs"
             @click="handleReject(row.original.id)"

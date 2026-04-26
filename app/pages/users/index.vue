@@ -91,10 +91,7 @@ async function handleCreate() {
       />
     </div>
 
-    <UModal
-      v-model:open="showModal"
-      :ui="{ overlay: 'backdrop-blur-sm bg-black/40 dark:bg-black/50' }"
-    >
+    <UModal v-model:open="showModal">
       <template #content>
         <UCard>
           <template #header

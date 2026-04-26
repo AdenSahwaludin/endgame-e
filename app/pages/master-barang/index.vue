@@ -5,6 +5,10 @@ const { hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
 
+watch(search, () => {
+  page.value = 1;
+});
+
 const { data, refresh } = await useFetch("/api/master-barang", {
   query: computed(() => ({
     search: search.value,
