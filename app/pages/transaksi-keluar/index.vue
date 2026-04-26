@@ -4,7 +4,7 @@ const toast = useToast();
 const { canApprove, hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
-const statusFilter = ref("");
+const statusFilter = ref<string | null>(null);
 
 watch(search, () => {
   page.value = 1;
@@ -19,7 +19,7 @@ const { data, refresh } = await useFetch("/api/transaksi-keluar", {
     search: search.value,
     page: page.value,
     limit: 20,
-    status: statusFilter.value,
+    status: statusFilter.value || undefined,
   })),
   watch: [search, page, statusFilter],
 });
@@ -70,6 +70,26 @@ async function handleReject(id: number) {
   toast.add({ title: "Ditolak", color: "warning" });
   refresh();
 }
+
+async function handleReturn(id: number) {
+  if (!confirm("Tandai unit barang ini sudah kembali dan ubah status ke baik?"))
+    return;
+  try {
+    await $fetch(`/api/transaksi-keluar/${id}/kembalikan`, { method: "POST" });
+    toast.add({
+      title: "Berhasil",
+      description: "Unit dikembalikan dan status menjadi baik",
+      color: "success",
+    });
+    refresh();
+  } catch (e: any) {
+    toast.add({
+      title: "Error",
+      description: e.data?.statusMessage || "Gagal mengembalikan unit",
+      color: "error",
+    });
+  }
+}
 </script>
 
 <template>
@@ -95,7 +115,7 @@ async function handleReject(id: number) {
       <USelectMenu
         v-model="statusFilter"
         :items="[
-          { label: 'Semua', value: '' },
+          { label: 'Semua', value: null },
           { label: 'Pending', value: 'pending' },
           { label: 'Approved', value: 'approved' },
           { label: 'Rejected', value: 'rejected' },
@@ -126,23 +146,37 @@ async function handleReject(id: number) {
       >
       <template #user-cell="{ row }">{{ row.original.user?.name }}</template>
       <template #actions-cell="{ row }">
-        <div
-          class="flex gap-1"
-          v-if="row.original.approvalStatus === 'pending' && canApprove()"
-        >
+        <div class="flex gap-1">
+          <template
+            v-if="row.original.approvalStatus === 'pending' && canApprove()"
+          >
+            <UButton
+              icon="i-heroicons-check"
+              color="success"
+              variant="ghost"
+              size="xs"
+              @click="handleApprove(row.original.id)"
+            />
+            <UButton
+              icon="i-heroicons-x-mark"
+              color="error"
+              variant="ghost"
+              size="xs"
+              @click="handleReject(row.original.id)"
+            />
+          </template>
           <UButton
-            icon="i-heroicons-check"
-            color="success"
+            v-if="
+              row.original.approvalStatus === 'approved' &&
+              ['peminjaman', 'penggunaan'].includes(row.original.tipe) &&
+              row.original.unitBarang?.status === 'dipinjam' &&
+              hasPermission('create_transaksi_keluars')
+            "
+            icon="i-heroicons-arrow-uturn-left"
+            color="primary"
             variant="ghost"
             size="xs"
-            @click="handleApprove(row.original.id)"
-          />
-          <UButton
-            icon="i-heroicons-x-mark"
-            color="error"
-            variant="ghost"
-            size="xs"
-            @click="handleReject(row.original.id)"
+            @click="handleReturn(row.original.id)"
           />
         </div>
       </template>

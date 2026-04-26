@@ -4,7 +4,7 @@ const toast = useToast();
 const { hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
-const statusFilter = ref("");
+const statusFilter = ref<string | null>(null);
 
 watch(search, () => {
   page.value = 1;
@@ -19,7 +19,7 @@ const { data, refresh } = await useFetch("/api/unit-barang", {
     search: search.value,
     page: page.value,
     limit: 20,
-    status: statusFilter.value,
+    status: statusFilter.value || undefined,
     activeOnly: "false",
   })),
   watch: [search, page, statusFilter],
@@ -76,7 +76,7 @@ async function toggleUnit(unit: any) {
       <USelectMenu
         v-model="statusFilter"
         :items="[
-          { label: 'Semua', value: '' },
+          { label: 'Semua', value: null },
           { label: 'Baik', value: 'baik' },
           { label: 'Dipinjam', value: 'dipinjam' },
           { label: 'Rusak', value: 'rusak' },
@@ -101,7 +101,7 @@ async function toggleUnit(unit: any) {
       >
       <template #aktif-cell="{ row }"
         ><UBadge
-          :color="row.original.isActive ? 'green' : 'red'"
+          :color="row.original.isActive ? 'success' : 'error'"
           variant="subtle"
           >{{ row.original.isActive ? "Ya" : "Tidak" }}</UBadge
         ></template
@@ -116,7 +116,7 @@ async function toggleUnit(unit: any) {
           "
           variant="ghost"
           size="xs"
-          :color="row.original.isActive ? 'red' : 'green'"
+          :color="row.original.isActive ? 'error' : 'success'"
           @click="toggleUnit(row.original)"
         />
       </template>

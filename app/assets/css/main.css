@@ -50,8 +50,3 @@ main table tbody td,
 main table thead th {
   vertical-align: middle;
 }
-
-[data-slot="overlay"][data-state="open"] {
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}

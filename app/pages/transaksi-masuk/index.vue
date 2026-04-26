@@ -4,7 +4,7 @@ const toast = useToast();
 const { hasPermission, canApprove } = usePermission();
 const search = ref("");
 const page = ref(1);
-const statusFilter = ref("");
+const statusFilter = ref<string | null>(null);
 
 watch(search, () => {
   page.value = 1;
@@ -19,7 +19,7 @@ const { data, refresh } = await useFetch("/api/transaksi-masuk", {
     search: search.value,
     page: page.value,
     limit: 20,
-    status: statusFilter.value,
+    status: statusFilter.value || undefined,
   })),
   watch: [search, page, statusFilter],
 });
@@ -103,7 +103,7 @@ async function handleReject(id: number) {
       <USelectMenu
         v-model="statusFilter"
         :items="[
-          { label: 'Semua', value: '' },
+          { label: 'Semua', value: null },
           { label: 'Pending', value: 'pending' },
           { label: 'Approved', value: 'approved' },
           { label: 'Rejected', value: 'rejected' },

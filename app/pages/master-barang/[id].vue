@@ -36,22 +36,34 @@ const statusColor = (s: string) =>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <UCard
-        ><p class="text-sm text-gray-500">Kategori</p>
-        <p class="font-semibold">{{ master.kategori?.namaKategori }}</p></UCard
-      >
-      <UCard
-        ><p class="text-sm text-gray-500">Merk</p>
-        <p class="font-semibold">{{ master.merk || "-" }}</p></UCard
-      >
-      <UCard
-        ><p class="text-sm text-gray-500">Satuan</p>
-        <p class="font-semibold">{{ master.satuan }}</p></UCard
-      >
-      <UCard
-        ><p class="text-sm text-gray-500">Total Unit</p>
-        <p class="font-semibold">{{ master.unitBarang?.length || 0 }}</p></UCard
-      >
+      <UCard>
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <UIcon name="i-heroicons-tag" class="w-4 h-4" />
+          <p>Kategori</p>
+        </div>
+        <p class="font-semibold mt-1">{{ master.kategori?.namaKategori }}</p>
+      </UCard>
+      <UCard>
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <UIcon name="i-heroicons-swatch" class="w-4 h-4" />
+          <p>Merk</p>
+        </div>
+        <p class="font-semibold mt-1">{{ master.merk || "-" }}</p>
+      </UCard>
+      <UCard>
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <UIcon name="i-heroicons-scale" class="w-4 h-4" />
+          <p>Satuan</p>
+        </div>
+        <p class="font-semibold mt-1">{{ master.satuan }}</p>
+      </UCard>
+      <UCard>
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <UIcon name="i-heroicons-cube" class="w-4 h-4" />
+          <p>Total Unit</p>
+        </div>
+        <p class="font-semibold mt-1">{{ master.unitBarang?.length || 0 }}</p>
+      </UCard>
     </div>
 
     <UCard>

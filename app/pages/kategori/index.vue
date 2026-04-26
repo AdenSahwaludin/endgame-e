@@ -134,7 +134,7 @@ async function handleDelete(id: string) {
             icon="i-heroicons-trash"
             variant="ghost"
             size="xs"
-            color="red"
+            color="error"
             @click="handleDelete(row.original.kodeKategori)"
           />
         </div>
