@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  name            String
+  email           String    @unique
+  password        String
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+  roleId          Int       @map("role_id")
+  role            Role      @relation(fields: [roleId], references: [id])
+  transaksiBarang       TransaksiBarang[]  @relation("TransaksiCreator")
+  approvedTransaksi     TransaksiBarang[]  @relation("TransaksiApprover")
+  transaksiKeluar       TransaksiKeluar[]  @relation("TransaksiKeluarCreator")
+  approvedTransaksiKeluar TransaksiKeluar[] @relation("TransaksiKeluarApprover")
+  logAktivitas          LogAktivitas[]
+  backupLogs            BackupLog[]
+  mutasiLokasi          MutasiLokasi[]
+  barangRusak           BarangRusak[]
+  @@map("users")
+}
+
+model Role {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  users       User[]
+  permissions RolePermission[]
+  @@map("roles")
+}
+
+model Permission {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  createdAt   DateTime  @default(now()) @map("created_at")
+  roles       RolePermission[]
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Kategori {
+  kodeKategori  String    @id @map("kode_kategori")
+  namaKategori  String    @map("nama_kategori")
+  deskripsi     String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+  masterBarang  MasterBarang[]
+  @@map("kategori")
+}
+
+model Ruang {
+  id            Int       @id @default(autoincrement())
+  namaRuang     String    @map("nama_ruang")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+  unitBarang          UnitBarang[]
+  transaksiBarang     TransaksiBarang[]   @relation("TransaksiRuangTujuan")
+  transaksiKeluarAsal TransaksiKeluar[]   @relation("TransaksiKeluarRuangAsal")
+  transaksiKeluarTujuan TransaksiKeluar[] @relation("TransaksiKeluarRuangTujuan")
+  mutasiAsal          MutasiLokasi[]      @relation("MutasiRuangAsal")
+  mutasiTujuan        MutasiLokasi[]      @relation("MutasiRuangTujuan")
+  barangRusak         BarangRusak[]
+  @@map("ruang")
+}
+
+model MasterBarang {
+  kodeMaster      String    @id @map("kode_master")
+  namaBarang      String    @map("nama_barang")
+  kategoriId      String    @map("kategori_id")
+  satuan          String    @default("pcs")
+  merk            String?
+  hargaSatuan     Decimal?  @map("harga_satuan") @db.Decimal(15, 2)
+  reorderPoint    Int       @default(0) @map("reorder_point")
+  totalPesanan    Int       @default(0) @map("total_pesanan")
+  deskripsi       String?
+  distribusiLokasi Json?    @map("distribusi_lokasi")
+  createdBy       Int?      @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+  kategori        Kategori  @relation(fields: [kategoriId], references: [kodeKategori])
+  unitBarang      UnitBarang[]
+  transaksiBarang TransaksiBarang[]
+  @@map("master_barang")
+}
+
+model UnitBarang {
+  kodeUnit        String    @id @map("kode_unit")
+  masterBarangId  String    @map("master_barang_id")
+  ruangId         Int       @map("ruang_id")
+  status          String    @default("baik")
+  isActive        Boolean   @default(true) @map("is_active")
+  tanggalPembelian DateTime? @map("tanggal_pembelian") @db.Date
+  catatan         String?
+  createdBy       Int?      @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  masterBarang    MasterBarang    @relation(fields: [masterBarangId], references: [kodeMaster])
+  ruang           Ruang           @relation(fields: [ruangId], references: [id])
+  transaksiKeluar TransaksiKeluar[]
+  barangRusak     BarangRusak[]
+  mutasiLokasi    MutasiLokasi[]
+  @@map("unit_barang")
+}
+
+model TransaksiBarang {
+  id              Int       @id @default(autoincrement())
+  kodeTransaksi   String    @unique @map("kode_transaksi")
+  masterBarangId  String    @map("master_barang_id")
+  distribusiLokasi Json?    @map("distribusi_lokasi")
+  tanggalTransaksi DateTime @map("tanggal_transaksi") @db.Date
+  totalPesanan    Int       @default(0) @map("total_pesanan")
+  penanggungJawab String?   @map("penanggung_jawab")
+  keterangan      String?
+  userId          Int       @map("user_id")
+  approvedBy      Int?      @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  approvalStatus  String    @default("pending") @map("approval_status")
+  approvalNotes   String?   @map("approval_notes")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  masterBarang    MasterBarang @relation(fields: [masterBarangId], references: [kodeMaster])
+  user            User         @relation("TransaksiCreator", fields: [userId], references: [id])
+  approver        User?        @relation("TransaksiApprover", fields: [approvedBy], references: [id])
+  ruangTujuan     Ruang?       @relation("TransaksiRuangTujuan", fields: [ruangTujuanId], references: [id])
+  ruangTujuanId   Int?         @map("ruang_tujuan_id")
+  @@map("transaksi_barang")
+}
+
+model TransaksiKeluar {
+  id              Int       @id @default(autoincrement())
+  kodeTransaksi   String    @unique @map("kode_transaksi")
+  unitBarangId    String    @map("unit_barang_id")
+  ruangAsalId     Int?      @map("ruang_asal_id")
+  ruangTujuanId   Int?      @map("ruang_tujuan_id")
+  tipe            String
+  tanggalTransaksi DateTime @map("tanggal_transaksi") @db.Date
+  penerima        String?
+  tujuan          String?
+  keterangan      String?
+  catatan         String?
+  userId          Int       @map("user_id")
+  approvedBy      Int?      @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  approvalStatus  String    @default("pending") @map("approval_status")
+  approvalNotes   String?   @map("approval_notes")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  unitBarang      UnitBarang @relation(fields: [unitBarangId], references: [kodeUnit])
+  ruangAsal       Ruang?     @relation("TransaksiKeluarRuangAsal", fields: [ruangAsalId], references: [id])
+  ruangTujuan     Ruang?     @relation("TransaksiKeluarRuangTujuan", fields: [ruangTujuanId], references: [id])
+  user            User       @relation("TransaksiKeluarCreator", fields: [userId], references: [id])
+  approver        User?      @relation("TransaksiKeluarApprover", fields: [approvedBy], references: [id])
+  @@map("transaksi_keluar")
+}
+
+model BarangRusak {
+  id              Int       @id @default(autoincrement())
+  unitBarangId    String    @map("unit_barang_id")
+  ruangId         Int?      @map("ruang_id")
+  tanggalKejadian DateTime? @map("tanggal_kejadian") @db.Date
+  tanggalRusak    DateTime? @map("tanggal_rusak") @db.Date
+  keterangan      String?
+  penanggungJawab String?   @map("penanggung_jawab")
+  userId          Int       @map("user_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  unitBarang      UnitBarang @relation(fields: [unitBarangId], references: [kodeUnit])
+  ruang           Ruang?     @relation(fields: [ruangId], references: [id])
+  user            User       @relation(fields: [userId], references: [id])
+  @@map("barang_rusak")
+}
+
+model MutasiLokasi {
+  id              Int       @id @default(autoincrement())
+  unitBarangId    String    @map("unit_barang_id")
+  ruangAsalId     Int?      @map("ruang_asal_id")
+  ruangTujuanId   Int       @map("ruang_tujuan_id")
+  tanggalMutasi   DateTime  @map("tanggal_mutasi") @db.Date
+  tipeMutasi      String    @default("manual") @map("tipe_mutasi")
+  keterangan      String?
+  userId          Int       @map("user_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  unitBarang      UnitBarang @relation(fields: [unitBarangId], references: [kodeUnit])
+  ruangAsal       Ruang?     @relation("MutasiRuangAsal", fields: [ruangAsalId], references: [id])
+  ruangTujuan     Ruang      @relation("MutasiRuangTujuan", fields: [ruangTujuanId], references: [id])
+  user            User       @relation(fields: [userId], references: [id])
+  @@map("mutasi_lokasi")
+}
+
+model LogAktivitas {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  jenisAktivitas  String    @map("jenis_aktivitas")
+  namaTabel       String?   @map("nama_tabel")
+  recordId        String?   @map("record_id")
+  deskripsi       String
+  perubahanData   Json?     @map("perubahan_data")
+  ipAddress       String?   @map("ip_address")
+  userAgent       String?   @map("user_agent")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  user            User      @relation(fields: [userId], references: [id])
+  @@map("log_aktivitas")
+}
+
+model BackupLog {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  filename        String?
+  format          String    @default("sql")
+  fileSize        BigInt?   @map("file_size")
+  status          String    @default("pending")
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+  user            User      @relation(fields: [userId], references: [id])
+  @@map("backup_logs")
+}
