@@ -3,12 +3,16 @@ definePageMeta({ layout: "admin", middleware: "auth" });
 const toast = useToast();
 const { hasPermission } = usePermission();
 const page = ref(1);
+const sortBy = ref("createdAt");
+const sortOrder = ref("desc");
 const showCreate = ref(false);
 const loading = ref(false);
 
 const { data, refresh } = await useFetch("/api/mutasi-lokasi", {
-  query: computed(() => ({ page: page.value })),
-  watch: [page],
+  query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value, page: page.value })),
+  watch: [page, sortBy, sortOrder],
 });
 
 const { data: units } = await useFetch("/api/unit-barang", {
@@ -89,7 +93,7 @@ const columns = [
   { id: "dari", accessorKey: "ruangAsal.namaRuang", header: "Dari" },
   { id: "ke", accessorKey: "ruangTujuan.namaRuang", header: "Ke" },
   { id: "tipe", accessorKey: "tipeMutasi", header: "Tipe" },
-  { id: "tanggal", accessorKey: "tanggalMutasi", header: "Tanggal" },
+  { id: "tanggal", accessorKey: "tanggalMutasi", header: "Tanggal", sortable: true },
   { id: "user", accessorKey: "user.name", header: "User" },
 ];
 </script>
@@ -109,7 +113,7 @@ const columns = [
       </UButton>
     </div>
 
-    <UTable :data="data?.data || []" :columns="columns">
+    <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #barang-cell="{ row }">{{
         row.original.unitBarang?.masterBarang?.namaBarang
       }}</template>
@@ -128,7 +132,7 @@ const columns = [
         }}</UBadge></template
       >
       <template #user-cell="{ row }">{{ row.original.user?.name }}</template>
-    </UTable>
+    </AppTable>
     <div class="flex justify-center">
       <UPagination
         v-if="data"

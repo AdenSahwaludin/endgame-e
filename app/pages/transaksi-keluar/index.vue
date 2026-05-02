@@ -4,6 +4,8 @@ const toast = useToast();
 const { canApprove, hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
+const sortBy = ref("createdAt");
+const sortOrder = ref("desc");
 const statusFilter = ref<string | null>(null);
 
 watch(search, () => {
@@ -16,19 +18,21 @@ watch(statusFilter, () => {
 
 const { data, refresh } = await useFetch("/api/transaksi-keluar", {
   query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
     search: search.value,
     page: page.value,
     limit: 20,
     status: statusFilter.value || undefined,
   })),
-  watch: [search, page, statusFilter],
+  watch: [search, page, statusFilter, sortBy, sortOrder],
 });
 
 const columns = [
-  { id: "kode", accessorKey: "kodeTransaksi", header: "Kode" },
+  { id: "kode", accessorKey: "kodeTransaksi", header: "Kode", sortable: true },
   { id: "unit", accessorKey: "unitBarang.kodeUnit", header: "Unit" },
-  { id: "tipe", accessorKey: "tipe", header: "Tipe" },
-  { id: "tanggal", accessorKey: "tanggalTransaksi", header: "Tanggal" },
+  { id: "tipe", accessorKey: "tipe", header: "Tipe", sortable: true },
+  { id: "tanggal", accessorKey: "tanggalTransaksi", header: "Tanggal", sortable: true },
   { id: "status", accessorKey: "approvalStatus", header: "Status" },
   { id: "user", accessorKey: "user.name", header: "Dibuat Oleh" },
   { id: "actions", header: "Aksi" },
@@ -45,50 +49,79 @@ const tipeColor = (t: string) =>
     penghapusan: "red",
   })[t] || "gray") as any;
 
+const { confirm } = useConfirm();
+
 async function handleApprove(id: number) {
-  if (!confirm("Setujui transaksi keluar ini?")) return;
-  try {
-    await $fetch(`/api/transaksi-keluar/${id}/approve`, { method: "POST" });
-    toast.add({ title: "Disetujui", color: "success" });
-    refresh();
-  } catch (e: any) {
-    toast.add({
-      title: "Error",
-      description: e.data?.statusMessage,
-      color: "error",
-    });
-  }
+  confirm({
+    title: "Setujui Transaksi",
+    message: "Setujui transaksi keluar ini?",
+    color: "success",
+    onConfirm: async () => {
+      try {
+        await $fetch(`/api/transaksi-keluar/${id}/approve`, { method: "POST" });
+        toast.add({ title: "Disetujui", color: "success" });
+        refresh();
+      } catch (e: any) {
+        toast.add({
+          title: "Error",
+          description: e.data?.statusMessage,
+          color: "error",
+        });
+      }
+    }
+  });
 }
 
 async function handleReject(id: number) {
-  const notes = prompt("Alasan penolakan:");
-  if (notes === null) return;
-  await $fetch(`/api/transaksi-keluar/${id}/reject`, {
-    method: "POST",
-    body: { approvalNotes: notes },
+  confirm({
+    title: "Tolak Transaksi",
+    message: "Masukkan alasan penolakan untuk transaksi ini.",
+    isPrompt: true,
+    promptPlaceholder: "Alasan penolakan...",
+    color: "error",
+    onConfirm: async (notes) => {
+      if (!notes) return;
+      try {
+        await $fetch(`/api/transaksi-keluar/${id}/reject`, {
+          method: "POST",
+          body: { approvalNotes: notes },
+        });
+        toast.add({ title: "Ditolak", color: "warning" });
+        refresh();
+      } catch (e: any) {
+        toast.add({
+          title: "Error",
+          description: e.data?.statusMessage,
+          color: "error",
+        });
+      }
+    }
   });
-  toast.add({ title: "Ditolak", color: "warning" });
-  refresh();
 }
 
 async function handleReturn(id: number) {
-  if (!confirm("Tandai unit barang ini sudah kembali dan ubah status ke baik?"))
-    return;
-  try {
-    await $fetch(`/api/transaksi-keluar/${id}/kembalikan`, { method: "POST" });
-    toast.add({
-      title: "Berhasil",
-      description: "Unit dikembalikan dan status menjadi baik",
-      color: "success",
-    });
-    refresh();
-  } catch (e: any) {
-    toast.add({
-      title: "Error",
-      description: e.data?.statusMessage || "Gagal mengembalikan unit",
-      color: "error",
-    });
-  }
+  confirm({
+    title: "Kembalikan Unit",
+    message: "Tandai unit barang ini sudah kembali dan ubah status ke baik?",
+    color: "primary",
+    onConfirm: async () => {
+      try {
+        await $fetch(`/api/transaksi-keluar/${id}/kembalikan`, { method: "POST" });
+        toast.add({
+          title: "Berhasil",
+          description: "Unit dikembalikan dan status menjadi baik",
+          color: "success",
+        });
+        refresh();
+      } catch (e: any) {
+        toast.add({
+          title: "Error",
+          description: e.data?.statusMessage || "Gagal mengembalikan unit",
+          color: "error",
+        });
+      }
+    }
+  });
 }
 </script>
 
@@ -112,6 +145,10 @@ async function handleReturn(id: number) {
         icon="i-heroicons-magnifying-glass"
         class="max-w-sm"
       />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
+        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
+      </div>
       <USelectMenu
         v-model="statusFilter"
         :items="[
@@ -125,7 +162,7 @@ async function handleReturn(id: number) {
       />
     </div>
 
-    <UTable :data="data?.data || []" :columns="columns">
+    <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #unit-cell="{ row }">{{
         row.original.unitBarang?.kodeUnit
       }}</template>
@@ -152,16 +189,20 @@ async function handleReturn(id: number) {
           >
             <UButton
               icon="i-heroicons-check"
+              label="Setujui"
               color="success"
               variant="ghost"
               size="xs"
+              class="btn-jelly btn-soft"
               @click="handleApprove(row.original.id)"
             />
             <UButton
               icon="i-heroicons-x-mark"
+              label="Tolak"
               color="error"
               variant="ghost"
               size="xs"
+              class="btn-jelly btn-soft"
               @click="handleReject(row.original.id)"
             />
           </template>
@@ -173,14 +214,16 @@ async function handleReturn(id: number) {
               hasPermission('create_transaksi_keluars')
             "
             icon="i-heroicons-arrow-uturn-left"
+            label="Kembalikan"
             color="primary"
             variant="ghost"
             size="xs"
+            class="btn-jelly btn-soft"
             @click="handleReturn(row.original.id)"
           />
         </div>
       </template>
-    </UTable>
+    </AppTable>
     <div class="flex justify-center">
       <UPagination
         v-if="data"

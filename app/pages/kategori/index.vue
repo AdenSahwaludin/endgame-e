@@ -5,6 +5,8 @@ const { hasPermission } = usePermission();
 
 const search = ref("");
 const page = ref(1);
+const sortBy = ref("createdAt");
+const sortOrder = ref("desc");
 const showModal = ref(false);
 const editMode = ref(false);
 const form = ref({ kodeKategori: "", namaKategori: "", deskripsi: "" });
@@ -18,14 +20,16 @@ const { data, refresh } = await useFetch("/api/kategori", {
   query: computed(() => ({
     search: search.value,
     page: page.value,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
     limit: 20,
   })),
-  watch: [search, page],
+  watch: [search, page, sortBy, sortOrder],
 });
 
 const columns = [
-  { id: "kode", accessorKey: "kodeKategori", header: "Kode" },
-  { id: "nama", accessorKey: "namaKategori", header: "Nama Kategori" },
+  { id: "kode", accessorKey: "kodeKategori", header: "Kode", sortable: true },
+  { id: "nama", accessorKey: "namaKategori", header: "Nama Kategori", sortable: true },
   { id: "deskripsi", accessorKey: "deskripsi", header: "Deskripsi" },
   { id: "actions", header: "Aksi" },
 ];
@@ -80,23 +84,31 @@ async function handleSubmit() {
   }
 }
 
+const { confirm } = useConfirm();
+
 async function handleDelete(id: string) {
-  if (!confirm("Yakin ingin menghapus?")) return;
-  try {
-    await $fetch(`/api/kategori/${id}`, { method: "DELETE" });
-    toast.add({
-      title: "Berhasil",
-      description: "Kategori dihapus",
-      color: "success",
-    });
-    refresh();
-  } catch (e: any) {
-    toast.add({
-      title: "Error",
-      description: e.data?.statusMessage || "Gagal",
-      color: "error",
-    });
-  }
+  confirm({
+    title: "Hapus Kategori",
+    message: "Apakah Anda yakin ingin menghapus kategori ini?",
+    color: "error",
+    onConfirm: async () => {
+      try {
+        await $fetch(`/api/kategori/${id}`, { method: "DELETE" });
+        toast.add({
+          title: "Berhasil",
+          description: "Kategori dihapus",
+          color: "success",
+        });
+        refresh();
+      } catch (e: any) {
+        toast.add({
+          title: "Error",
+          description: e.data?.statusMessage,
+          color: "error",
+        });
+      }
+    }
+  });
 }
 </script>
 
@@ -112,14 +124,20 @@ async function handleDelete(id: string) {
       >
     </div>
 
-    <UInput
+    <div class="flex gap-3 flex-wrap items-center">
+      <UInput
       v-model="search"
       placeholder="Cari kategori..."
       icon="i-heroicons-magnifying-glass"
       class="max-w-sm"
     />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
+        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
+      </div>
+    </div>
 
-    <UTable :data="data?.data || []" :columns="columns">
+    <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #actions-cell="{ row }">
         <div class="flex gap-1">
           <UButton
@@ -139,7 +157,7 @@ async function handleDelete(id: string) {
           />
         </div>
       </template>
-    </UTable>
+    </AppTable>
 
     <div class="flex justify-center">
       <UPagination

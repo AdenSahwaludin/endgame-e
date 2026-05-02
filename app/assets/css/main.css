@@ -50,3 +50,41 @@ main table tbody td,
 main table thead th {
   vertical-align: middle;
 }
+
+/* Premium Jelly Button Animation & Styling */
+.btn-jelly {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background state for 'soft' look (only apply to ghost/link variants implicitly) */
+/* We'll use a specific class for the soft background to avoid breaking solid buttons */
+.btn-soft {
+  background-color: color-mix(in oklab, currentColor 15%, transparent) !important;
+}
+
+.btn-soft:hover {
+  background-color: color-mix(in oklab, currentColor 25%, transparent) !important;
+}
+
+.btn-jelly:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px color-mix(in oklab, currentColor 30%, transparent);
+}
+
+/* Jelly animation on click */
+@keyframes jelly {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(1.15, 0.85); }
+  40% { transform: scale(0.85, 1.15); }
+  50% { transform: scale(1.1, 0.9); }
+  65% { transform: scale(0.95, 1.05); }
+  75% { transform: scale(1.05, 0.95); }
+  100% { transform: scale(1, 1); }
+}
+
+.btn-jelly:active {
+  animation: jelly 0.5s ease-in-out both;
+  transform: scale(0.95);
+}

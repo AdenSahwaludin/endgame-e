@@ -4,6 +4,8 @@ const toast = useToast();
 const { hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
+const sortBy = ref("createdAt");
+const sortOrder = ref("desc");
 const showModal = ref(false);
 const editMode = ref(false);
 const editId = ref(0);
@@ -18,9 +20,11 @@ const { data, refresh } = await useFetch("/api/ruang", {
   query: computed(() => ({
     search: search.value,
     page: page.value,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
     limit: 20,
   })),
-  watch: [search, page],
+  watch: [search, page, sortBy, sortOrder],
 });
 
 const columns = [
@@ -66,11 +70,19 @@ async function handleSubmit() {
   }
 }
 
+const { confirm } = useConfirm();
+
 async function handleDelete(id: number) {
-  if (!confirm("Yakin?")) return;
-  await $fetch(`/api/ruang/${id}`, { method: "DELETE" });
-  toast.add({ title: "Berhasil dihapus", color: "success" });
-  refresh();
+  confirm({
+    title: "Hapus Ruang",
+    message: "Apakah Anda yakin ingin menghapus ruang ini? Tindakan ini tidak dapat dibatalkan.",
+    color: "error",
+    onConfirm: async () => {
+      await $fetch(`/api/ruang/${id}`, { method: "DELETE" });
+      toast.add({ title: "Berhasil dihapus", color: "success" });
+      refresh();
+    }
+  });
 }
 </script>
 
@@ -85,13 +97,19 @@ async function handleDelete(id: number) {
         >Tambah</UButton
       >
     </div>
-    <UInput
+    <div class="flex gap-3 flex-wrap items-center">
+      <UInput
       v-model="search"
       placeholder="Cari ruang..."
       icon="i-heroicons-magnifying-glass"
       class="max-w-sm"
     />
-    <UTable :data="data?.data || []" :columns="columns">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
+        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
+      </div>
+    </div>
+    <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #actions-cell="{ row }">
         <div class="flex gap-1">
           <UButton
@@ -99,6 +117,7 @@ async function handleDelete(id: number) {
             icon="i-heroicons-pencil-square"
             variant="ghost"
             size="xs"
+            class="btn-jelly btn-soft"
             @click="openEdit(row.original)"
           />
           <UButton
@@ -106,12 +125,13 @@ async function handleDelete(id: number) {
             icon="i-heroicons-trash"
             variant="ghost"
             size="xs"
+            class="btn-jelly btn-soft"
             color="error"
             @click="handleDelete(row.original.id)"
           />
         </div>
       </template>
-    </UTable>
+    </AppTable>
     <div class="flex justify-center">
       <UPagination
         v-if="data"

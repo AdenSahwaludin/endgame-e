@@ -3,13 +3,17 @@ definePageMeta({ layout: "admin", middleware: "auth" });
 const toast = useToast();
 const { hasPermission } = usePermission();
 const page = ref(1);
+const sortBy = ref("createdAt");
+const sortOrder = ref("desc");
 const showModal = ref(false);
 const loading = ref(false);
 
 const { data: roles } = await useFetch("/api/roles");
 const { data, refresh } = await useFetch("/api/users", {
-  query: computed(() => ({ page: page.value })),
-  watch: [page],
+  query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value, page: page.value })),
+  watch: [page, sortBy, sortOrder],
 });
 
 const form = ref({
@@ -29,7 +33,7 @@ const roleOptions = computed(() => {
 
 const columns = [
   { id: "name", accessorKey: "name", header: "Nama" },
-  { id: "email", accessorKey: "email", header: "Email" },
+  { id: "email", accessorKey: "email", header: "Email", sortable: true },
   { id: "role", accessorKey: "role.name", header: "Role" },
   { id: "isActive", accessorKey: "isActive", header: "Aktif" },
 ];
@@ -68,7 +72,7 @@ async function handleCreate() {
         >Tambah User</UButton
       >
     </div>
-    <UTable :data="data?.data || []" :columns="columns">
+    <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #role-cell="{ row }"
         ><UBadge variant="subtle">{{
           row.original.role?.name
@@ -81,7 +85,7 @@ async function handleCreate() {
           >{{ row.original.isActive ? "Aktif" : "Non-aktif" }}</UBadge
         ></template
       >
-    </UTable>
+    </AppTable>
     <div class="flex justify-center">
       <UPagination
         v-if="data"

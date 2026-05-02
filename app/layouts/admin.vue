@@ -250,5 +250,6 @@ const navigation = computed(() => {
         <slot />
       </main>
     </div>
+    <AppConfirm />
   </div>
 </template>

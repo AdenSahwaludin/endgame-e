@@ -79,7 +79,7 @@ const statusColor = (s: string) =>
         >
         <template #isActive-cell="{ row }"
           ><UBadge
-            :color="row.original.isActive ? 'green' : 'red'"
+            :color="row.original.isActive ? 'success' : 'error'"
             variant="subtle"
             >{{ row.original.isActive ? "Aktif" : "Non-aktif" }}</UBadge
           ></template

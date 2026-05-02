@@ -18,14 +18,14 @@ const form = ref({
   hargaSatuan: 0,
   reorderPoint: 0,
   deskripsi: "",
-  distribusiLokasi: [{ ruangId: 0, jumlah: 1 }] as {
+  distribusiLokasi: [{ ruangId: undefined as any, jumlah: 1 }] as {
     ruangId: number;
     jumlah: number;
   }[],
 });
 
 function addDistribusi() {
-  form.value.distribusiLokasi.push({ ruangId: 0, jumlah: 1 });
+  form.value.distribusiLokasi.push({ ruangId: undefined as any, jumlah: 1 });
 }
 function removeDistribusi(i: number) {
   form.value.distribusiLokasi.splice(i, 1);
@@ -179,7 +179,7 @@ async function handleSubmit() {
             </UFormField>
             <UButton
               icon="i-heroicons-trash"
-              color="red"
+              color="error"
               variant="ghost"
               size="sm"
               @click="removeDistribusi(i)"

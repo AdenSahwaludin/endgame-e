@@ -15,7 +15,7 @@ const form = ref({
   tanggalTransaksi: new Date().toISOString().split("T")[0],
   penanggungJawab: "",
   keterangan: "",
-  distribusiLokasi: [{ ruangId: 0, jumlah: 1 }] as {
+  distribusiLokasi: [{ ruangId: undefined as any, jumlah: 1 }] as {
     ruangId: number;
     jumlah: number;
   }[],
@@ -36,7 +36,7 @@ const ruangOptions = computed(() => {
 });
 
 function addDist() {
-  form.value.distribusiLokasi.push({ ruangId: 0, jumlah: 1 });
+  form.value.distribusiLokasi.push({ ruangId: undefined as any, jumlah: 1 });
 }
 function removeDist(i: number) {
   form.value.distribusiLokasi.splice(i, 1);

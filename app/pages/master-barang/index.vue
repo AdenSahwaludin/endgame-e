@@ -4,6 +4,8 @@ const toast = useToast();
 const { hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
+const sortBy = ref('createdAt');
+const sortOrder = ref('desc');
 
 watch(search, () => {
   page.value = 1;
@@ -11,11 +13,13 @@ watch(search, () => {
 
 const { data, refresh } = await useFetch("/api/master-barang", {
   query: computed(() => ({
+    sortBy: sortBy.value,
     search: search.value,
     page: page.value,
+    sortOrder: sortOrder.value,
     limit: 20,
   })),
-  watch: [search, page],
+  watch: [search, page, sortOrder],
 });
 
 const columns = [
@@ -42,14 +46,20 @@ const columns = [
         >Tambah</UButton
       >
     </div>
-    <UInput
+    <div class="flex gap-3 flex-wrap items-center">
+      <UInput
       v-model="search"
       placeholder="Cari barang..."
       icon="i-heroicons-magnifying-glass"
       class="max-w-sm"
     />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
+        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
+      </div>
+    </div>
 
-    <UTable :data="data?.data || []" :columns="columns">
+    <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #kategori-cell="{ row }">
         <UBadge variant="subtle">{{
           row.original.kategori?.namaKategori
@@ -72,11 +82,12 @@ const columns = [
             icon="i-heroicons-eye"
             variant="ghost"
             size="xs"
+            class="btn-jelly btn-soft"
             :to="`/master-barang/${row.original.kodeMaster}`"
           />
         </div>
       </template>
-    </UTable>
+    </AppTable>
     <div class="flex justify-center">
       <UPagination
         v-if="data"

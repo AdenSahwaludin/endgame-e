@@ -4,6 +4,8 @@ const toast = useToast();
 const { hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
+const sortBy = ref("createdAt");
+const sortOrder = ref("desc");
 const statusFilter = ref<string | null>(null);
 
 watch(search, () => {
@@ -16,24 +18,26 @@ watch(statusFilter, () => {
 
 const { data, refresh } = await useFetch("/api/unit-barang", {
   query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
     search: search.value,
     page: page.value,
     limit: 20,
     status: statusFilter.value || undefined,
     activeOnly: "false",
   })),
-  watch: [search, page, statusFilter],
+  watch: [search, page, statusFilter, sortBy, sortOrder],
 });
 
 const columns = [
-  { id: "kode", accessorKey: "kodeUnit", header: "Kode Unit" },
+  { id: "kode", accessorKey: "kodeUnit", header: "Kode Unit", sortable: true },
   {
     id: "barang",
     accessorKey: "masterBarang.namaBarang",
     header: "Nama Barang",
   },
-  { id: "ruang", accessorKey: "ruang.namaRuang", header: "Ruang" },
-  { id: "status", accessorKey: "status", header: "Status" },
+  { id: "ruang", accessorKey: "ruang.namaRuang", header: "Ruang", sortable: true },
+  { id: "status", accessorKey: "status", header: "Status", sortable: true },
   { id: "aktif", accessorKey: "isActive", header: "Aktif" },
   { id: "actions", header: "Aksi" },
 ];
@@ -42,22 +46,30 @@ const statusColor = (s: string) =>
   (({ baik: "green", dipinjam: "yellow", rusak: "red", dihapus: "gray" })[s] ||
     "gray") as any;
 
+const { confirm } = useConfirm();
+
 async function toggleUnit(unit: any) {
   const action = unit.isActive ? "nonaktifkan" : "aktifkan";
-  if (!confirm(`Yakin ingin ${action} unit ${unit.kodeUnit}?`)) return;
-  try {
-    await $fetch(`/api/unit-barang/${unit.kodeUnit}/${action}`, {
-      method: "POST",
-    });
-    toast.add({ title: "Berhasil", color: "success" });
-    refresh();
-  } catch (e: any) {
-    toast.add({
-      title: "Error",
-      description: e.data?.statusMessage,
-      color: "error",
-    });
-  }
+  confirm({
+    title: `${action.charAt(0).toUpperCase() + action.slice(1)} Unit`,
+    message: `Yakin ingin ${action} unit ${unit.kodeUnit}?`,
+    color: unit.isActive ? 'error' : 'success',
+    onConfirm: async () => {
+      try {
+        await $fetch(`/api/unit-barang/${unit.kodeUnit}/${action}`, {
+          method: "POST",
+        });
+        toast.add({ title: "Berhasil", color: "success" });
+        refresh();
+      } catch (e: any) {
+        toast.add({
+          title: "Error",
+          description: e.data?.statusMessage,
+          color: "error",
+        });
+      }
+    }
+  });
 }
 </script>
 
@@ -73,6 +85,10 @@ async function toggleUnit(unit: any) {
         icon="i-heroicons-magnifying-glass"
         class="max-w-sm"
       />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
+        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
+      </div>
       <USelectMenu
         v-model="statusFilter"
         :items="[
@@ -87,7 +103,7 @@ async function toggleUnit(unit: any) {
         class="w-40"
       />
     </div>
-    <UTable :data="data?.data || []" :columns="columns">
+    <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #barang-cell="{ row }">{{
         row.original.masterBarang?.namaBarang
       }}</template>
@@ -114,13 +130,15 @@ async function toggleUnit(unit: any) {
               ? 'i-heroicons-no-symbol'
               : 'i-heroicons-check-circle'
           "
+          :label="row.original.isActive ? 'Nonaktifkan' : 'Aktifkan'"
           variant="ghost"
           size="xs"
+          class="btn-jelly btn-soft"
           :color="row.original.isActive ? 'error' : 'success'"
           @click="toggleUnit(row.original)"
         />
       </template>
-    </UTable>
+    </AppTable>
     <div class="flex justify-center">
       <UPagination
         v-if="data"
