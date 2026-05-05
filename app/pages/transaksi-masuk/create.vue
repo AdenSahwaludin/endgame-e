@@ -142,7 +142,7 @@ async function handleSubmit() {
             /></UFormField>
             <UButton
               icon="i-heroicons-trash"
-              color="red"
+              color="error"
               variant="ghost"
               size="sm"
               @click="removeDist(i)"

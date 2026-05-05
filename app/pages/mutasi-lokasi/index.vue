@@ -3,16 +3,28 @@ definePageMeta({ layout: "admin", middleware: "auth" });
 const toast = useToast();
 const { hasPermission } = usePermission();
 const page = ref(1);
+const search = ref("");
 const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
 const showCreate = ref(false);
 const loading = ref(false);
 
-const { data, refresh } = await useFetch("/api/mutasi-lokasi", {
+interface MutasiLokasiResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data, refresh } = await useFetch<MutasiLokasiResponse>("/api/mutasi-lokasi", {
   query: computed(() => ({
     sortBy: sortBy.value,
-    sortOrder: sortOrder.value, page: page.value })),
-  watch: [page, sortBy, sortOrder],
+    sortOrder: sortOrder.value,
+    search: search.value,
+    page: page.value,
+    limit: 20,
+  })),
+  watch: [search, page, sortBy, sortOrder],
 });
 
 const { data: units } = await useFetch("/api/unit-barang", {

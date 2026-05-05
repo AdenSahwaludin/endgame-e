@@ -16,7 +16,14 @@ watch(statusFilter, () => {
   page.value = 1;
 });
 
-const { data, refresh } = await useFetch("/api/transaksi-masuk", {
+interface TransaksiMasukResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data, refresh } = await useFetch<TransaksiMasukResponse>("/api/transaksi-masuk", {
   query: computed(() => ({
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,

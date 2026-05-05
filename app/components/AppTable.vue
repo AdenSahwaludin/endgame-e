@@ -1,11 +1,11 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 import { useSlots } from 'vue';
-const props = defineProps({
-  data: { type: Array, required: true },
-  columns: { type: Array, required: true },
-  sortBy: { type: String, required: false },
-  sortOrder: { type: String, required: false }
-});
+const props = defineProps<{
+  data: T[];
+  columns: any[];
+  sortBy?: string;
+  sortOrder?: string;
+}>();
 const emit = defineEmits(['update:sortBy', 'update:sortOrder']);
 const slots = useSlots();
 

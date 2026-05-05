@@ -16,7 +16,14 @@ watch(search, () => {
   page.value = 1;
 });
 
-const { data, refresh } = await useFetch("/api/kategori", {
+interface KategoriResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data, refresh } = await useFetch<KategoriResponse>("/api/kategori", {
   query: computed(() => ({
     search: search.value,
     page: page.value,

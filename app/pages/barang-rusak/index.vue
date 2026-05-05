@@ -5,17 +5,29 @@ const { hasPermission } = usePermission();
 const page = ref(1);
 const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
+const search = ref("");
 const showCreate = ref(false);
 const loading = ref(false);
 
 const { data: units } = await useFetch("/api/unit-barang", {
   query: { limit: 500, activeOnly: "true", status: "baik" },
 });
-const { data, refresh } = await useFetch("/api/barang-rusak", {
+interface BarangRusakResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data, refresh } = await useFetch<BarangRusakResponse>("/api/barang-rusak", {
   query: computed(() => ({
     sortBy: sortBy.value,
-    sortOrder: sortOrder.value, page: page.value })),
-  watch: [page, sortBy, sortOrder],
+    sortOrder: sortOrder.value,
+    search: search.value,
+    page: page.value,
+    limit: 20,
+  })),
+  watch: [search, page, sortBy, sortOrder],
 });
 
 const form = ref({
@@ -135,7 +147,7 @@ async function handleSubmit() {
               <UButton variant="ghost" @click="showCreate = false"
                 >Batal</UButton
               >
-              <UButton type="submit" :loading="loading" color="red"
+              <UButton type="submit" :loading="loading" color="error"
                 >Laporkan</UButton
               >
             </div>

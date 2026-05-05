@@ -16,7 +16,14 @@ watch(statusFilter, () => {
   page.value = 1;
 });
 
-const { data, refresh } = await useFetch("/api/unit-barang", {
+interface UnitBarangResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data, refresh } = await useFetch<UnitBarangResponse>("/api/unit-barang", {
   query: computed(() => ({
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,

@@ -6,20 +6,29 @@ const search = ref("");
 const page = ref(1);
 const sortBy = ref('createdAt');
 const sortOrder = ref('desc');
+const kategoriFilter = ref("");
 
 watch(search, () => {
   page.value = 1;
 });
 
-const { data, refresh } = await useFetch("/api/master-barang", {
+interface MasterBarangResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data, refresh } = await useFetch<MasterBarangResponse>("/api/master-barang", {
   query: computed(() => ({
     sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
     search: search.value,
     page: page.value,
-    sortOrder: sortOrder.value,
     limit: 20,
+    kategoriId: kategoriFilter.value || undefined,
   })),
-  watch: [search, page, sortOrder],
+  watch: [search, page, kategoriFilter, sortBy, sortOrder],
 });
 
 const columns = [

@@ -16,7 +16,14 @@ watch(search, () => {
   page.value = 1;
 });
 
-const { data, refresh } = await useFetch("/api/ruang", {
+interface RuangResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data, refresh } = await useFetch<RuangResponse>("/api/ruang", {
   query: computed(() => ({
     search: search.value,
     page: page.value,

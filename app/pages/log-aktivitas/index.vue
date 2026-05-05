@@ -3,10 +3,20 @@ definePageMeta({ layout: "admin", middleware: "auth" });
 const page = ref(1);
 const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
-const { data } = await useFetch("/api/log-aktivitas", {
+interface LogAktivitasResponse {
+  data: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const { data } = await useFetch<LogAktivitasResponse>("/api/log-aktivitas", {
   query: computed(() => ({
     sortBy: sortBy.value,
-    sortOrder: sortOrder.value, page: page.value })),
+    sortOrder: sortOrder.value,
+    page: page.value,
+    limit: 50,
+  })),
   watch: [page, sortBy, sortOrder],
 });
 
