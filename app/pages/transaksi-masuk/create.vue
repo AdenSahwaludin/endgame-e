@@ -54,7 +54,7 @@ async function handleSubmit() {
     });
     toast.add({
       title: "Berhasil",
-      description: "Transaksi masuk dibuat (pending approval)",
+      description: "Pengadaan barang dibuat (pending approval)",
       color: "success",
     });
     navigateTo("/transaksi-masuk");
@@ -79,7 +79,7 @@ async function handleSubmit() {
         to="/transaksi-masuk"
       />
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Tambah Transaksi Masuk
+        Tambah Pengadaan Barang
       </h2>
     </div>
     <UCard class="w-full">

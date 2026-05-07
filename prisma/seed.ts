@@ -36,7 +36,7 @@ async function main() {
 
   // 3. Assign Permissions
   const allPerms = await prisma.permission.findMany()
-  
+
   // Admin all perms
   for (const perm of allPerms) {
     await prisma.rolePermission.upsert({
@@ -101,12 +101,12 @@ async function main() {
   const kepsekUser = await prisma.user.upsert({
     where: { email: 'kepala@gmail.com' },
     update: {},
-    create: { name: 'Bunda Siti (Kepala TK)', email: 'kepala@gmail.com', password: hashedPassword, roleId: kepsekRole.id, isActive: true },
+    create: { name: 'Bunda Siti', email: 'kepala@gmail.com', password: hashedPassword, roleId: kepsekRole.id, isActive: true },
   })
   const petugasUser = await prisma.user.upsert({
     where: { email: 'petugas@gmail.com' },
     update: {},
-    create: { name: 'Mas Budi (Petugas Inventaris)', email: 'petugas@gmail.com', password: hashedPassword, roleId: petugasRole.id, isActive: true },
+    create: { name: 'Mas Budi', email: 'petugas@gmail.com', password: hashedPassword, roleId: petugasRole.id, isActive: true },
   })
   console.log('✅ 3 users created')
 
@@ -192,12 +192,12 @@ async function main() {
   await prisma.barangRusak.deleteMany()
   await prisma.mutasiLokasi.deleteMany()
 
-  // 10. Create initial Transaksi Barang (Inbound)
+  // 10. Create initial Pengadaan Barang
   const inboundTx = await prisma.transaksiBarang.upsert({
-    where: { kodeTransaksi: 'TX-IN-001' },
+    where: { kodeTransaksi: 'TRX-PENGADAAN-20260102-001' },
     update: {},
     create: {
-      kodeTransaksi: 'TX-IN-001',
+      kodeTransaksi: 'TRX-PENGADAAN-20260102-001',
       masterBarangId: 'ELE-002',
       tanggalTransaksi: new Date('2024-01-10'),
       totalPesanan: 1,
@@ -212,12 +212,12 @@ async function main() {
   })
   console.log('✅ 1 inbound transaction created')
 
-  // 11. Create initial Transaksi Keluar (Distribution/Loan)
+  // 11. Create initial Pengelolaan Aset (Distribution/Loan)
   await prisma.transaksiKeluar.upsert({
-    where: { kodeTransaksi: 'TX-OUT-001' },
+    where: { kodeTransaksi: 'TRX-ASET-20260102-001' },
     update: {},
     create: {
-      kodeTransaksi: 'TX-OUT-001',
+      kodeTransaksi: 'TRX-ASET-20260102-001',
       unitBarangId: 'ELE-001-01',
       ruangAsalId: 8,
       ruangTujuanId: 6,

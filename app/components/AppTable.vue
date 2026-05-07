@@ -26,20 +26,22 @@ function handleSort(key: string) {
     <template v-for="col in columns" :key="col.id" #[`${col.id}-header`]="{ column }">
       <div 
         v-if="col.sortable !== false && col.id !== 'actions' && (col.accessorKey || col.id)" 
-        class="flex items-center gap-1 cursor-pointer select-none hover:text-primary transition-colors" 
+        class="group flex items-center gap-1.5 cursor-pointer select-none hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" 
         @click="handleSort(col.accessorKey || col.id)"
       >
-        <span>{{ col.header }}</span>
-        <UIcon 
-          v-if="sortBy === (col.accessorKey || col.id)" 
-          :name="sortOrder === 'asc' ? 'i-heroicons-arrow-up' : 'i-heroicons-arrow-down'" 
-          class="w-4 h-4" 
-        />
-        <UIcon 
-          v-else 
-          name="i-heroicons-arrows-up-down" 
-          class="w-4 h-4 opacity-0 group-hover:opacity-100 text-gray-400" 
-        />
+        <span class="font-semibold">{{ col.header }}</span>
+        <div class="flex items-center">
+          <UIcon 
+            v-if="sortBy === (col.accessorKey || col.id)" 
+            :name="sortOrder === 'asc' ? 'i-heroicons-chevron-up-20-solid' : 'i-heroicons-chevron-down-20-solid'" 
+            class="w-4 h-4 text-primary-500" 
+          />
+          <UIcon 
+            v-else 
+            name="i-heroicons-chevron-up-down-20-solid" 
+            class="w-4 h-4 text-gray-400 opacity-40 group-hover:opacity-100 transition-opacity" 
+          />
+        </div>
       </div>
       <div v-else>
         {{ col.header }}

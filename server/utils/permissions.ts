@@ -23,12 +23,12 @@ export const PERMISSIONS = {
   CREATE_UNIT_BARANGS: 'create_unit_barangs',
   EDIT_UNIT_BARANGS: 'edit_unit_barangs',
   NONAKTIFKAN_UNIT_BARANGS: 'nonaktifkan_unit_barangs',
-  // Transaksi Masuk
+  // Pengadaan Barang
   VIEW_TRANSAKSI_BARANGS: 'view_transaksi_barangs',
   CREATE_TRANSAKSI_BARANGS: 'create_transaksi_barangs',
   EDIT_TRANSAKSI_BARANGS: 'edit_transaksi_barangs',
   APPROVE_TRANSAKSI_BARANGS: 'approve_transaksi_barangs',
-  // Transaksi Keluar
+  // Pengelolaan Aset
   VIEW_TRANSAKSI_KELUARS: 'view_transaksi_keluars',
   CREATE_TRANSAKSI_KELUARS: 'create_transaksi_keluars',
   EDIT_TRANSAKSI_KELUARS: 'edit_transaksi_keluars',

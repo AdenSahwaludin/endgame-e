@@ -36,19 +36,6 @@ const navigation = computed(() => {
     label: "PENGATURAN",
     items: [] as Array<{ label: string; icon: string; to: string }>,
   };
-
-  if (hasPermission("view_kategoris"))
-    masterGroup.items.push({
-      label: "Kategori",
-      icon: "i-heroicons-tag",
-      to: "/kategori",
-    });
-  if (hasPermission("view_ruangs"))
-    masterGroup.items.push({
-      label: "Ruang",
-      icon: "i-heroicons-building-office",
-      to: "/ruang",
-    });
   if (hasPermission("view_master_barangs"))
     masterGroup.items.push({
       label: "Master Barang",
@@ -61,16 +48,30 @@ const navigation = computed(() => {
       icon: "i-heroicons-cube",
       to: "/unit-barang",
     });
+  if (hasPermission("view_kategoris"))
+    masterGroup.items.push({
+      label: "Kategori",
+      icon: "i-heroicons-tag",
+      to: "/kategori",
+    });
+  if (hasPermission("view_ruangs"))
+    masterGroup.items.push({
+      label: "Ruang",
+      icon: "i-heroicons-building-office",
+      to: "/ruang",
+    });
+  
+  
 
   if (hasPermission("view_transaksi_barangs"))
     transaksiGroup.items.push({
-      label: "Transaksi Masuk",
+      label: "Pengadaan Barang",
       icon: "i-heroicons-arrow-down-tray",
       to: "/transaksi-masuk",
     });
   if (hasPermission("view_transaksi_keluars"))
     transaksiGroup.items.push({
-      label: "Transaksi Keluar",
+      label: "Pengelolaan Aset",
       icon: "i-heroicons-arrow-up-tray",
       to: "/transaksi-keluar",
     });

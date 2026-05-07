@@ -58,14 +58,14 @@ export async function generateKodeUnit(masterBarangId: string): Promise<string> 
 
 /**
  * Generate kode transaksi masuk.
- * Pattern: TRX-MASUK-YYYYMMDD-XXX
+ * Pattern: TRX-PENGADAAN-YYYYMMDD-XXX
  */
 export async function generateKodeTransaksiMasuk(): Promise<string> {
   const now = new Date()
   const dateStr = now.getFullYear().toString() +
     String(now.getMonth() + 1).padStart(2, '0') +
     String(now.getDate()).padStart(2, '0')
-  const prefix = `TRX-MASUK-${dateStr}-`
+  const prefix = `TRX-PENGADAAN-${dateStr}-`
 
   const last = await prisma.transaksiBarang.findFirst({
     where: { kodeTransaksi: { startsWith: prefix } },
@@ -79,14 +79,14 @@ export async function generateKodeTransaksiMasuk(): Promise<string> {
 
 /**
  * Generate kode transaksi keluar.
- * Pattern: TRX-KELUAR-YYYYMMDD-XXX
+ * Pattern: TRX-ASET-YYYYMMDD-XXX
  */
 export async function generateKodeTransaksiKeluar(): Promise<string> {
   const now = new Date()
   const dateStr = now.getFullYear().toString() +
     String(now.getMonth() + 1).padStart(2, '0') +
     String(now.getDate()).padStart(2, '0')
-  const prefix = `TRX-KELUAR-${dateStr}-`
+  const prefix = `TRX-ASET-${dateStr}-`
 
   const last = await prisma.transaksiKeluar.findFirst({
     where: { kodeTransaksi: { startsWith: prefix } },

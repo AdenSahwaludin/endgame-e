@@ -30,6 +30,6 @@ export default defineEventHandler(async (event) => {
     include: { unitBarang: true },
   })
 
-  await logAktivitas({ userId, jenis: 'create', deskripsi: `Transaksi keluar ${kodeTransaksi} dibuat`, namaTabel: 'transaksi_keluar', recordId: String(transaksi.id) })
+  await logAktivitas({ userId, jenis: 'create', deskripsi: `Pengelolaan aset ${kodeTransaksi} dibuat`, namaTabel: 'transaksi_keluar', recordId: String(transaksi.id) })
   return transaksi
 })

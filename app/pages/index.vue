@@ -10,8 +10,8 @@ const statCards = computed(() => {
     { label: 'Unit Aktif', value: stats.value.totalUnitAktif, icon: 'i-heroicons-cube', color: 'success' as const },
     { label: 'Unit Dipinjam', value: stats.value.totalUnitDipinjam, icon: 'i-heroicons-arrow-up-tray', color: 'warning' as const },
     { label: 'Unit Rusak', value: stats.value.totalUnitRusak, icon: 'i-heroicons-exclamation-triangle', color: 'error' as const },
-    { label: 'Transaksi Masuk Pending', value: stats.value.transaksiMasukPending, icon: 'i-heroicons-clock', color: stats.value.transaksiMasukPending > 0 ? 'warning' as const : 'success' as const },
-    { label: 'Transaksi Keluar Pending', value: stats.value.transaksiKeluarPending, icon: 'i-heroicons-clock', color: stats.value.transaksiKeluarPending > 0 ? 'warning' as const : 'success' as const },
+    { label: 'Pengadaan Barang Pending', value: stats.value.transaksiMasukPending, icon: 'i-heroicons-clock', color: stats.value.transaksiMasukPending > 0 ? 'warning' as const : 'success' as const },
+    { label: 'Pengelolaan Aset Pending', value: stats.value.transaksiKeluarPending, icon: 'i-heroicons-clock', color: stats.value.transaksiKeluarPending > 0 ? 'warning' as const : 'success' as const },
   ]
 })
 </script>

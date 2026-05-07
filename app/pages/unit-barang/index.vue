@@ -85,7 +85,7 @@ async function toggleUnit(unit: any) {
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
       Unit Barang
     </h2>
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex gap-3 flex-wrap items-center">
       <UInput
         v-model="search"
         placeholder="Cari unit..."
@@ -93,22 +93,21 @@ async function toggleUnit(unit: any) {
         class="max-w-sm"
       />
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
-        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
+        <USelectMenu
+          v-model="statusFilter"
+          :items="[
+            { label: 'Semua', value: null },
+            { label: 'Baik', value: 'baik' },
+            { label: 'Dipinjam', value: 'dipinjam' },
+            { label: 'Rusak', value: 'rusak' },
+            { label: 'Dihapus', value: 'dihapus' },
+          ]"
+          value-key="value"
+          placeholder="Filter status"
+          class="w-40"
+        />
       </div>
-      <USelectMenu
-        v-model="statusFilter"
-        :items="[
-          { label: 'Semua', value: null },
-          { label: 'Baik', value: 'baik' },
-          { label: 'Dipinjam', value: 'dipinjam' },
-          { label: 'Rusak', value: 'rusak' },
-          { label: 'Dihapus', value: 'dihapus' },
-        ]"
-        value-key="value"
-        placeholder="Filter status"
-        class="w-40"
-      />
     </div>
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #barang-cell="{ row }">{{

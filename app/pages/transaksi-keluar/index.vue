@@ -61,7 +61,7 @@ const { confirm } = useConfirm();
 async function handleApprove(id: number) {
   confirm({
     title: "Setujui Transaksi",
-    message: "Setujui transaksi keluar ini?",
+    message: "Setujui pengelolaan aset ini?",
     color: "success",
     onConfirm: async () => {
       try {
@@ -136,7 +136,7 @@ async function handleReturn(id: number) {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Transaksi Keluar
+        Pengelolaan Aset
       </h2>
       <UButton
         v-if="hasPermission('create_transaksi_keluars')"
@@ -145,7 +145,7 @@ async function handleReturn(id: number) {
         >Tambah</UButton
       >
     </div>
-    <div class="flex gap-3 flex-wrap">
+    <div class="flex gap-3 flex-wrap items-center">
       <UInput
         v-model="search"
         placeholder="Cari kode transaksi / unit..."
@@ -153,20 +153,19 @@ async function handleReturn(id: number) {
         class="max-w-sm"
       />
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
-        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
+        <USelectMenu
+          v-model="statusFilter"
+          :items="[
+            { label: 'Semua', value: null },
+            { label: 'Pending', value: 'pending' },
+            { label: 'Approved', value: 'approved' },
+            { label: 'Rejected', value: 'rejected' },
+          ]"
+          value-key="value"
+          class="w-40"
+        />
       </div>
-      <USelectMenu
-        v-model="statusFilter"
-        :items="[
-          { label: 'Semua', value: null },
-          { label: 'Pending', value: 'pending' },
-          { label: 'Approved', value: 'approved' },
-          { label: 'Rejected', value: 'rejected' },
-        ]"
-        value-key="value"
-        class="w-40"
-      />
     </div>
 
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">

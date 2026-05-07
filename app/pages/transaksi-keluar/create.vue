@@ -46,7 +46,7 @@ async function handleSubmit() {
     await $fetch("/api/transaksi-keluar", { method: "POST", body: form.value });
     toast.add({
       title: "Berhasil",
-      description: "Transaksi keluar dibuat",
+      description: "Pengelolaan aset dibuat",
       color: "success",
     });
     navigateTo("/transaksi-keluar");
@@ -71,7 +71,7 @@ async function handleSubmit() {
         to="/transaksi-keluar"
       />
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Tambah Transaksi Keluar
+        Tambah Pengelolaan Aset
       </h2>
     </div>
     <UCard class="w-full">

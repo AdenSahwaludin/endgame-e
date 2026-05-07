@@ -35,8 +35,8 @@ const { data: ruangs } = await useFetch("/api/ruang", {
 });
 
 const form = ref({
-  unitBarangId: "",
-  ruangTujuanId: 0,
+  unitBarangId: undefined,
+  ruangTujuanId: undefined,
   tanggalMutasi: new Date().toISOString().split("T")[0],
   tipeMutasi: "manual",
   keterangan: "",
@@ -77,8 +77,8 @@ async function handleCreateMutasi() {
     });
     showCreate.value = false;
     form.value = {
-      unitBarangId: "",
-      ruangTujuanId: 0,
+      unitBarangId: undefined,
+      ruangTujuanId: undefined,
       tanggalMutasi: new Date().toISOString().split("T")[0],
       tipeMutasi: "manual",
       keterangan: "",
@@ -167,6 +167,7 @@ const columns = [
                 :items="unitOptions"
                 value-key="value"
                 searchable
+                placeholder="Pilih Unit Barang"
                 class="w-full"
               />
             </UFormField>
@@ -175,6 +176,7 @@ const columns = [
                 v-model="form.ruangTujuanId"
                 :items="ruangOptions"
                 value-key="value"
+                placeholder="Pilih Ruang Tujuan"
                 class="w-full"
               />
             </UFormField>

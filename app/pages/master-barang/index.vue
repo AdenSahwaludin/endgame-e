@@ -57,15 +57,11 @@ const columns = [
     </div>
     <div class="flex gap-3 flex-wrap items-center">
       <UInput
-      v-model="search"
-      placeholder="Cari barang..."
-      icon="i-heroicons-magnifying-glass"
-      class="max-w-sm"
-    />
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Urutkan:</span>
-        <USelectMenu v-model="sortOrder" :items="[{label: 'Terbaru (Desc)', value: 'desc'}, {label: 'Terlama (Asc)', value: 'asc'}]" value-key="value" class="w-40" />
-      </div>
+        v-model="search"
+        placeholder="Cari barang..."
+        icon="i-heroicons-magnifying-glass"
+        class="max-w-sm"
+      />
     </div>
 
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">

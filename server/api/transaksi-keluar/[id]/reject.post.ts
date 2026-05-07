@@ -9,6 +9,6 @@ export default defineEventHandler(async (event) => {
     data: { approvalStatus: 'rejected', approvedBy: userId, approvedAt: new Date(), approvalNotes: body.approvalNotes || null },
   })
 
-  await logAktivitas({ userId, jenis: 'update', deskripsi: `Transaksi keluar ${id} ditolak`, namaTabel: 'transaksi_keluar', recordId: String(id) })
+  await logAktivitas({ userId, jenis: 'update', deskripsi: `Pengelolaan aset ${id} ditolak`, namaTabel: 'transaksi_keluar', recordId: String(id) })
   return { success: true }
 })

@@ -50,6 +50,6 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  await logAktivitas({ userId, jenis: 'update', deskripsi: `Transaksi keluar ${transaksi.kodeTransaksi} disetujui (${transaksi.tipe})`, namaTabel: 'transaksi_keluar', recordId: String(id) })
+  await logAktivitas({ userId, jenis: 'update', deskripsi: `Pengelolaan aset ${transaksi.kodeTransaksi} disetujui (${transaksi.tipe})`, namaTabel: 'transaksi_keluar', recordId: String(id) })
   return { success: true }
 })
