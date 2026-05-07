@@ -24,6 +24,7 @@ interface UnitBarangResponse {
 }
 
 const { data, refresh } = await useFetch<UnitBarangResponse>("/api/unit-barang", {
+  key: "unit-barang-list",
   query: computed(() => ({
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,
@@ -34,6 +35,11 @@ const { data, refresh } = await useFetch<UnitBarangResponse>("/api/unit-barang",
     activeOnly: "false",
   })),
   watch: [search, page, statusFilter, sortBy, sortOrder],
+});
+
+// Scroll to top on page change
+watch(page, () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 const columns = [

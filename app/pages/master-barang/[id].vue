@@ -68,7 +68,7 @@ const statusColor = (s: string) =>
 
     <UCard>
       <template #header><h3 class="font-semibold">Daftar Unit</h3></template>
-      <UTable :data="master.unitBarang || []" :columns="unitColumns">
+      <AppTable :data="master.unitBarang || []" :columns="unitColumns">
         <template #ruang-cell="{ row }">{{
           row.original.ruang?.namaRuang
         }}</template>
@@ -84,7 +84,7 @@ const statusColor = (s: string) =>
             >{{ row.original.isActive ? "Aktif" : "Non-aktif" }}</UBadge
           ></template
         >
-      </UTable>
+      </AppTable>
     </UCard>
   </div>
 </template>

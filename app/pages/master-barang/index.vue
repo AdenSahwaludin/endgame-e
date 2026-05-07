@@ -36,7 +36,7 @@ const columns = [
   { id: "nama", accessorKey: "namaBarang", header: "Nama Barang" },
   { id: "kategori", accessorKey: "kategori.namaKategori", header: "Kategori" },
   { id: "merk", accessorKey: "merk", header: "Merk" },
-  { id: "stok", accessorKey: "_count.unitBarang", header: "Unit Aktif" },
+  { id: "stok", accessorKey: "unitBarang._count", header: "Unit Aktif" },
   { id: "min_stok", accessorKey: "reorderPoint", header: "Min. Stok" },
   { id: "actions", header: "Aksi" },
 ];
@@ -85,9 +85,10 @@ const columns = [
         <div class="flex gap-1">
           <UButton
             icon="i-heroicons-eye"
-            variant="ghost"
+            color="neutral"
+            variant="soft"
             size="xs"
-            class="btn-jelly btn-soft"
+            class="btn-jelly"
             :to="`/master-barang/${row.original.kodeMaster}`"
           />
         </div>

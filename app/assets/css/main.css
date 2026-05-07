@@ -1,6 +1,45 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/* View Transitions API - Circle Reveal */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* We always reveal the NEW state over the OLD state */
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2147483647;
+  animation: 700ms cubic-bezier(0.4, 0, 0.2, 1) both reveal;
+}
+
+/* Keyframes for the circle reveal effect */
+@keyframes reveal {
+  from {
+    clip-path: circle(0% at var(--x) var(--y));
+  }
+
+  to {
+    clip-path: circle(125% at var(--x) var(--y));
+  }
+}
+
+/* Optional: Different easing for a more 'organic' feel */
+@keyframes reveal-organic {
+  from {
+    clip-path: circle(0% at var(--x) var(--y));
+  }
+
+  to {
+    clip-path: circle(150% at var(--x) var(--y));
+  }
+}
+
 button,
 [role="button"],
 a[href],
@@ -14,42 +53,18 @@ button:disabled,
   cursor: not-allowed;
 }
 
-main table {
-  border-collapse: separate;
-  border-spacing: 0;
+/* Global container background overrides for dark mode (#0f172b -> #111827) */
+.dark .u-card,
+.dark [data-slot="card"],
+.dark .u-modal [data-slot="content"],
+.dark .u-modal>div>div,
+.dark .u-popover [data-slot="content"],
+.dark .u-select-menu [data-slot="content"] {
+  border-color: rgba(55, 65, 81, 0.5) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
 }
 
-main table thead tr {
-  background: color-mix(
-    in oklab,
-    var(--ui-bg-elevated, #0f172a) 65%,
-    transparent
-  );
-}
-
-main table thead th {
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-
-main table tbody tr {
-  transition:
-    background-color 0.18s ease,
-    transform 0.18s ease;
-}
-
-main table tbody tr:hover {
-  background: color-mix(
-    in oklab,
-    var(--ui-bg-elevated, #0f172a) 45%,
-    transparent
-  );
-}
-
-main table tbody td,
-main table thead th {
-  vertical-align: middle;
-}
+/* Table styles moved to AppTable :ui configuration */
 
 /* Premium Jelly Button Animation & Styling */
 .btn-jelly {
@@ -58,8 +73,6 @@ main table thead th {
   overflow: hidden;
 }
 
-/* Background state for 'soft' look (only apply to ghost/link variants implicitly) */
-/* We'll use a specific class for the soft background to avoid breaking solid buttons */
 .btn-soft {
   background-color: color-mix(in oklab, currentColor 15%, transparent) !important;
 }
@@ -73,15 +86,34 @@ main table thead th {
   box-shadow: 0 8px 16px -4px color-mix(in oklab, currentColor 30%, transparent);
 }
 
-/* Jelly animation on click */
 @keyframes jelly {
-  0% { transform: scale(1, 1); }
-  30% { transform: scale(1.15, 0.85); }
-  40% { transform: scale(0.85, 1.15); }
-  50% { transform: scale(1.1, 0.9); }
-  65% { transform: scale(0.95, 1.05); }
-  75% { transform: scale(1.05, 0.95); }
-  100% { transform: scale(1, 1); }
+  0% {
+    transform: scale(1, 1);
+  }
+
+  30% {
+    transform: scale(1.15, 0.85);
+  }
+
+  40% {
+    transform: scale(0.85, 1.15);
+  }
+
+  50% {
+    transform: scale(1.1, 0.9);
+  }
+
+  65% {
+    transform: scale(0.95, 1.05);
+  }
+
+  75% {
+    transform: scale(1.05, 0.95);
+  }
+
+  100% {
+    transform: scale(1, 1);
+  }
 }
 
 .btn-jelly:active {

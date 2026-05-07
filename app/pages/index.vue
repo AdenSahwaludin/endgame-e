@@ -1,7 +1,13 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'auth' })
 
-const { data: stats, refresh } = await useFetch('/api/dashboard/stats')
+const { data: stats, refresh: refreshStats } = await useFetch('/api/dashboard/stats')
+const { data: charts, refresh: refreshCharts } = await useFetch('/api/dashboard/charts')
+
+function handleRefresh() {
+  refreshStats()
+  refreshCharts()
+}
 
 const statCards = computed(() => {
   if (!stats.value) return []
@@ -20,14 +26,18 @@ const statCards = computed(() => {
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h2>
-      <UButton icon="i-heroicons-arrow-path" variant="ghost" size="sm" @click="refresh()">
+      <UButton icon="i-heroicons-arrow-path" variant="ghost" size="sm" @click="handleRefresh">
         Refresh
       </UButton>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <UCard v-for="stat in statCards" :key="stat.label" class="hover:shadow-md transition-shadow">
+      <UCard
+        v-for="stat in statCards"
+        :key="stat.label"
+        class="group hover:shadow-md transition-shadow"
+      >
         <div class="flex items-center gap-4">
           <div
             class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
@@ -50,10 +60,40 @@ const statCards = computed(() => {
             />
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ stat.label }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ stat.value }}
+            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              {{ stat.label }}
+            </p>
           </div>
         </div>
+      </UCard>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <UCard>
+        <template #header>
+          <h3 class="text-base font-semibold text-gray-900 dark:text-white">Status Unit Barang</h3>
+        </template>
+        <ClientOnly>
+          <AppDoughnutChart v-if="charts?.doughnut" :data="charts.doughnut" />
+          <template #fallback>
+            <div class="h-64 flex items-center justify-center text-gray-500">Loading chart...</div>
+          </template>
+        </ClientOnly>
+      </UCard>
+      <UCard class="lg:col-span-2">
+        <template #header>
+          <h3 class="text-base font-semibold text-gray-900 dark:text-white">Top Kategori Barang</h3>
+        </template>
+        <ClientOnly>
+          <AppBarChart v-if="charts?.bar" :data="charts.bar" />
+          <template #fallback>
+            <div class="h-64 flex items-center justify-center text-gray-500">Loading chart...</div>
+          </template>
+        </ClientOnly>
       </UCard>
     </div>
   </div>

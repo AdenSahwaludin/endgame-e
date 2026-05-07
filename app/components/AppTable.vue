@@ -21,7 +21,19 @@ function handleSort(key: string) {
 </script>
 
 <template>
-  <UTable :data="data" :columns="columns" v-bind="$attrs">
+  <UTable 
+    :data="data" 
+    :columns="columns" 
+    v-bind="$attrs"
+    :ui="{
+      root: 'ring-1 ring-gray-200 dark:ring-gray-800 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900',
+      thead: 'bg-gray-50/50 dark:bg-gray-800/50',
+      tbody: 'divide-y divide-gray-200 dark:divide-gray-800',
+      tr: 'hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors duration-150',
+      th: 'text-gray-600 dark:text-gray-400 px-4 py-3.5',
+      td: 'px-4 py-3'
+    }"
+  >
     <!-- Render custom headers for sortable columns -->
     <template v-for="col in columns" :key="col.id" #[`${col.id}-header`]="{ column }">
       <div 

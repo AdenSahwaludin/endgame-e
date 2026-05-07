@@ -9,8 +9,28 @@ const sidebarOpen = ref(true);
 
 const isDarkMode = computed(() => colorMode.value === "dark");
 
-function toggleColorMode() {
-  colorMode.preference = isDarkMode.value ? "light" : "dark";
+function toggleColorMode(event: MouseEvent) {
+  const x = event.clientX;
+  const y = event.clientY;
+
+  if (!document.startViewTransition) {
+    colorMode.preference = isDarkMode.value ? "light" : "dark";
+    return;
+  }
+
+  document.documentElement.style.setProperty("--x", `${x}px`);
+  document.documentElement.style.setProperty("--y", `${y}px`);
+  
+  const targetTheme = isDarkMode.value ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme-transition", targetTheme);
+
+  const transition = document.startViewTransition(() => {
+    colorMode.preference = targetTheme;
+  });
+
+  transition.finished.finally(() => {
+    document.documentElement.removeAttribute("data-theme-transition");
+  });
 }
 
 async function handleLogout() {

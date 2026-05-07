@@ -158,7 +158,7 @@ async function handleSubmit() {
           <div
             v-for="(dist, i) in form.distribusiLokasi"
             :key="i"
-            class="flex items-end gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+            class="flex items-end gap-3 p-4 bg-transparent border border-gray-200 dark:border-gray-800 rounded-xl"
           >
             <UFormField label="Ruang" class="flex-1">
               <USelectMenu
@@ -166,7 +166,7 @@ async function handleSubmit() {
                 :items="ruangOptions"
                 value-key="value"
                 placeholder="Pilih ruang"
-                class="w-full"
+                  class="w-full"
               />
             </UFormField>
             <UFormField label="Jumlah" class="w-28">
@@ -174,7 +174,7 @@ async function handleSubmit() {
                 v-model.number="dist.jumlah"
                 type="number"
                 min="1"
-                class="w-full"
+                  class="w-full"
               />
             </UFormField>
             <UButton
