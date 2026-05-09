@@ -73,5 +73,9 @@ export function usePermission() {
     return hasRole("Admin");
   }
 
-  return { hasPermission, hasRole, canApprove, isAdmin };
+  function isKepsek(): boolean {
+    return hasRole("Kepala Sekolah");
+  }
+
+  return { hasPermission, hasRole, canApprove, isAdmin, isKepsek };
 }

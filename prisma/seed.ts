@@ -30,9 +30,9 @@ async function main() {
   const adminRole = await prisma.role.upsert({ where: { name: 'Admin' }, update: {}, create: { name: 'Admin' } })
   const kepsekRole = await prisma.role.upsert({ where: { name: 'Kepala Sekolah' }, update: {}, create: { name: 'Kepala Sekolah' } })
   const petugasRole = await prisma.role.upsert({ where: { name: 'Petugas Inventaris' }, update: {}, create: { name: 'Petugas Inventaris' } })
-  
+
   const allPerms = await prisma.permission.findMany()
-  
+
   // Admin: All perms
   for (const perm of allPerms) {
     await prisma.rolePermission.upsert({
@@ -43,9 +43,9 @@ async function main() {
   }
 
   // Kepala Sekolah: View all + Approvals + Reports
-  const kepsekPerms = allPerms.filter(p => 
-    p.name.startsWith('view_') || 
-    p.name.includes('approve_') || 
+  const kepsekPerms = allPerms.filter(p =>
+    p.name.startsWith('view_') ||
+    p.name.includes('approve_') ||
     ['generate_laporan', 'export_data'].includes(p.name)
   )
   for (const perm of kepsekPerms) {
@@ -57,13 +57,13 @@ async function main() {
   }
 
   // Petugas: View all + Create/Edit (except approve and delete)
-  const petugasPerms = allPerms.filter(p => 
-    p.name.startsWith('view_') || 
-    p.name.startsWith('create_') || 
+  const petugasPerms = allPerms.filter(p =>
+    p.name.startsWith('view_') ||
+    p.name.startsWith('create_') ||
     p.name.startsWith('edit_') ||
     p.name.includes('nonaktifkan_')
   ).filter(p => !p.name.includes('delete_') && !p.name.includes('approve_'))
-  
+
   for (const perm of petugasPerms) {
     await prisma.rolePermission.upsert({
       where: { roleId_permissionId: { roleId: petugasRole.id, permissionId: perm.id } },
@@ -162,11 +162,11 @@ async function main() {
 
   // 8. Create Unit Barang (Limited to ~50 units with variety)
   const units: any[] = []
-  
+
   // APE Dalam units (10 units)
   for (let i = 1; i <= 3; i++) units.push({ kodeUnit: `APE01-IND-${i}`, masterBarangId: 'APE-001', ruangId: 1, status: 'baik', createdBy: petugasUser.id })
   for (let i = 1; i <= 7; i++) units.push({ kodeUnit: `APE02-PZL-${i}`, masterBarangId: 'APE-002', ruangId: 2, status: i > 5 ? 'rusak' : 'baik', createdBy: petugasUser.id })
-  
+
   // Furniture units (25 units)
   for (let i = 1; i <= 8; i++) units.push({ kodeUnit: `TKA-MJA-${i}`, masterBarangId: 'MEB-001', ruangId: 2, status: 'baik', createdBy: petugasUser.id })
   for (let i = 1; i <= 8; i++) units.push({ kodeUnit: `TKB-MJA-${i}`, masterBarangId: 'MEB-001', ruangId: 3, status: 'baik', createdBy: petugasUser.id })
@@ -179,17 +179,17 @@ async function main() {
   units.push({ kodeUnit: 'KBD-MUS-01', masterBarangId: 'ART-001', ruangId: 10, status: 'baik', createdBy: petugasUser.id })
   for (let i = 1; i <= 5; i++) units.push({ kodeUnit: `BUK-REL-${i}`, masterBarangId: 'BUK-001', ruangId: 9, status: 'baik', createdBy: petugasUser.id })
   for (let i = 1; i <= 6; i++) units.push({ kodeUnit: `OLA-BLA-${i}`, masterBarangId: 'OLA-001', ruangId: 6, status: 'baik', createdBy: petugasUser.id })
-  
+
   await prisma.unitBarang.createMany({ data: units })
   console.log(`✅ ${units.length} Unit Barang created (Capped at 50)`)
 
   // 9. Create Transaksi Barang (Sync with auto-gen pattern)
-  const dateStr = '20240507'
+  const dateStr = '20260507'
   const pengadaan = [
-    { kode: `TRX-PENGADAAN-${dateStr}-001`, mb: 'ELE-001', qty: 2, status: 'approved', space: 8, date: '2024-05-07', appBy: kepsekUser.id },
-    { kode: `TRX-PENGADAAN-${dateStr}-002`, mb: 'APE-001', qty: 5, status: 'pending', space: 1, date: '2024-05-07' },
-    { kode: `TRX-PENGADAAN-${dateStr}-003`, mb: 'ART-002', qty: 3, status: 'rejected', space: 10, date: '2024-05-07', appBy: kepsekUser.id },
-    { kode: `TRX-PENGADAAN-${dateStr}-004`, mb: 'KES-001', qty: 1, status: 'approved', space: 8, date: '2024-05-07', appBy: kepsekUser.id },
+    { kode: `TRX-PENGADAAN-${dateStr}-001`, mb: 'ELE-001', qty: 2, status: 'approved', space: 8, date: '2026-05-07', appBy: kepsekUser.id },
+    { kode: `TRX-PENGADAAN-${dateStr}-002`, mb: 'APE-001', qty: 5, status: 'pending', space: 1, date: '2026-05-07' },
+    { kode: `TRX-PENGADAAN-${dateStr}-003`, mb: 'ART-002', qty: 3, status: 'rejected', space: 10, date: '2026-05-07', appBy: kepsekUser.id },
+    { kode: `TRX-PENGADAAN-${dateStr}-004`, mb: 'KES-001', qty: 1, status: 'approved', space: 8, date: '2026-05-07', appBy: kepsekUser.id },
   ]
 
   for (const p of pengadaan) {
@@ -212,9 +212,9 @@ async function main() {
 
   // 10. Create Transaksi Keluar (Sync with auto-gen pattern)
   const keluar = [
-    { kode: `TRX-ASET-${dateStr}-001`, unit: 'APE01-IND-1', type: 'peminjaman', status: 'approved', from: 1, to: 2, date: '2024-05-07', appBy: adminUser.id },
-    { kode: `TRX-ASET-${dateStr}-002`, unit: 'TKA-MJA-1', type: 'pemindahan', status: 'pending', from: 2, to: 7, date: '2024-05-07' },
-    { kode: `TRX-ASET-${dateStr}-003`, unit: 'SPK-GYM-01', type: 'peminjaman', status: 'approved', from: 10, to: 6, date: '2024-05-07', appBy: kepsekUser.id },
+    { kode: `TRX-ASET-${dateStr}-001`, unit: 'APE01-IND-1', type: 'peminjaman', status: 'approved', from: 1, to: 2, date: '2026-05-07', appBy: adminUser.id },
+    { kode: `TRX-ASET-${dateStr}-002`, unit: 'TKA-MJA-1', type: 'pemindahan', status: 'pending', from: 2, to: 7, date: '2026-05-07' },
+    { kode: `TRX-ASET-${dateStr}-003`, unit: 'SPK-GYM-01', type: 'peminjaman', status: 'approved', from: 10, to: 6, date: '2026-05-07', appBy: kepsekUser.id },
   ]
 
   for (const o of keluar) {
@@ -239,17 +239,17 @@ async function main() {
   // 11. Broken Items & Mutations
   await prisma.barangRusak.createMany({
     data: [
-      { unitBarangId: 'APE02-PZL-6', ruangId: 2, tanggalKejadian: new Date('2024-04-10'), keterangan: 'Pecah saat dimainkan', penanggungJawab: 'Ibu Ratna', userId: petugasUser.id },
-      { unitBarangId: 'TKA-KRS-5', ruangId: 2, tanggalKejadian: new Date('2024-02-15'), keterangan: 'Baut lepas', penanggungJawab: 'Mas Budi', userId: petugasUser.id },
+      { unitBarangId: 'APE02-PZL-6', ruangId: 2, tanggalKejadian: new Date('2026-04-10'), keterangan: 'Pecah saat dimainkan', penanggungJawab: 'Ibu Ratna', userId: petugasUser.id },
+      { unitBarangId: 'TKA-KRS-5', ruangId: 2, tanggalKejadian: new Date('2026-02-15'), keterangan: 'Baut lepas', penanggungJawab: 'Mas Budi', userId: petugasUser.id },
     ]
   })
-  
+
   await prisma.mutasiLokasi.create({
     data: {
       unitBarangId: 'TV-TKB-01',
       ruangAsalId: 7,
       ruangTujuanId: 3,
-      tanggalMutasi: new Date('2024-01-20'),
+      tanggalMutasi: new Date('2026-01-20'),
       tipeMutasi: 'manual',
       keterangan: 'Pemasangan awal di TKB',
       userId: petugasUser.id

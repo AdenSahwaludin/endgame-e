@@ -15,6 +15,9 @@ export default defineEventHandler(async (event) => {
   const sortOrder = (query.sortOrder as string) === "asc" ? "asc" : "desc";
   const limit = parseInt(query.limit as string) || 20;
 
+  const startDate = query.startDate as string;
+  const endDate = query.endDate as string;
+
   const where: any = {};
   if (status) where.approvalStatus = status;
   if (search) {
@@ -22,6 +25,16 @@ export default defineEventHandler(async (event) => {
       { kodeTransaksi: { contains: search } },
       { masterBarang: { namaBarang: { contains: search } } },
     ];
+  }
+  
+  if (startDate || endDate) {
+    where.tanggalTransaksi = {};
+    if (startDate) where.tanggalTransaksi.gte = new Date(startDate);
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      where.tanggalTransaksi.lte = end;
+    }
   }
 
   const [data, total] = await Promise.all([

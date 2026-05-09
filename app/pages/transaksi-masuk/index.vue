@@ -1,18 +1,19 @@
 <script setup lang="ts">
 definePageMeta({ layout: "admin", middleware: "auth" });
 const toast = useToast();
-const { hasPermission, canApprove } = usePermission();
+import { computed } from 'vue';
+import { useCurrency } from '~/composables/useCurrency';
+const { formatRupiah } = useCurrency();
+const { hasPermission, canApprove, isAdmin, isKepsek } = usePermission();
 const search = ref("");
 const page = ref(1);
 const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
 const statusFilter = ref<string | null>(null);
+const startDate = ref("");
+const endDate = ref("");
 
-watch(search, () => {
-  page.value = 1;
-});
-
-watch(statusFilter, () => {
+watch([search, statusFilter, startDate, endDate], () => {
   page.value = 1;
 });
 
@@ -31,19 +32,36 @@ const { data, refresh } = await useFetch<TransaksiMasukResponse>("/api/transaksi
     page: page.value,
     limit: 20,
     status: statusFilter.value || undefined,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
   })),
-  watch: [search, page, statusFilter, sortBy, sortOrder],
+  watch: [search, page, statusFilter, sortBy, sortOrder, startDate, endDate],
 });
 
-const columns = [
-  { id: "kode", accessorKey: "kodeTransaksi", header: "Kode Transaksi", sortable: true },
-  { id: "barang", accessorKey: "masterBarang.namaBarang", header: "Barang", sortable: true },
-  { id: "jumlah", accessorKey: "totalPesanan", header: "Jumlah" },
-  { id: "tanggal", accessorKey: "tanggalTransaksi", header: "Tanggal", sortable: true },
-  { id: "status", accessorKey: "approvalStatus", header: "Status" },
-  { id: "user", accessorKey: "user.name", header: "Dibuat Oleh" },
-  { id: "actions", header: "Aksi" },
-];
+const columns = computed(() => {
+  const cols: any[] = [
+    { id: "kode", accessorKey: "kodeTransaksi", header: "Kode Transaksi", sortable: true },
+    { id: "barang", accessorKey: "masterBarang.namaBarang", header: "Barang", sortable: true },
+    { id: "jumlah", accessorKey: "totalPesanan", header: "Jumlah" },
+  ];
+  if (isAdmin() || isKepsek()) {
+    cols.push({ id: "pengeluaran", header: "Total Pengeluaran" });
+  }
+  cols.push(
+    { id: "tanggal", accessorKey: "tanggalTransaksi", header: "Tanggal", sortable: true },
+    { id: "status", accessorKey: "approvalStatus", header: "Status" },
+    { id: "user", accessorKey: "user.name", header: "Dibuat Oleh" },
+    { id: "actions", header: "Aksi" }
+  );
+  return cols;
+});
+
+const grandTotal = computed(() => {
+  if (!data.value?.data) return 0;
+  return data.value.data.reduce((sum, item) => {
+    return sum + (item.totalPesanan * (item.masterBarang?.hargaSatuan || 0));
+  }, 0);
+});
 
 const statusColor = (s: string) =>
   (({ pending: "yellow", approved: "green", rejected: "red" })[s] ||
@@ -137,15 +155,33 @@ async function handleReject(id: number) {
             { label: 'Rejected', value: 'rejected' },
           ]"
           value-key="value"
-          class="w-40"
+          class="w-36"
         />
       </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rentang:</span>
+        <UInput v-model="startDate" type="date" class="w-40" />
+        <span class="text-gray-500">-</span>
+        <UInput v-model="endDate" type="date" class="w-40" />
+      </div>
     </div>
+
+    <UAlert
+      v-if="isAdmin() || isKepsek()"
+      icon="i-heroicons-banknotes"
+      color="primary"
+      variant="soft"
+      title="Ringkasan Anggaran"
+      :description="`Total pengeluaran dari data yang ditampilkan: ${formatRupiah(grandTotal)}`"
+    />
 
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #barang-cell="{ row }">{{
         row.original.masterBarang?.namaBarang
       }}</template>
+      <template #pengeluaran-cell="{ row }">
+        {{ formatRupiah(row.original.totalPesanan * (row.original.masterBarang?.hargaSatuan || 0)) }}
+      </template>
       <template #tanggal-cell="{ row }">{{
         new Date(row.original.tanggalTransaksi).toLocaleDateString("id-ID")
       }}</template>

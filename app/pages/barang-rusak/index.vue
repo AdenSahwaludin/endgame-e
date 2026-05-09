@@ -1,13 +1,22 @@
 <script setup lang="ts">
 definePageMeta({ layout: "admin", middleware: "auth" });
 const toast = useToast();
-const { hasPermission } = usePermission();
+import { computed } from 'vue';
+import { useCurrency } from '~/composables/useCurrency';
+const { formatRupiah } = useCurrency();
+const { hasPermission, isAdmin, isKepsek } = usePermission();
 const page = ref(1);
 const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
 const search = ref("");
 const showCreate = ref(false);
 const loading = ref(false);
+const startDate = ref("");
+const endDate = ref("");
+
+watch([search, startDate, endDate], () => {
+  page.value = 1;
+});
 
 const { data: units } = await useFetch("/api/unit-barang", {
   query: { limit: 500, activeOnly: "true", status: "baik" },
@@ -26,8 +35,10 @@ const { data, refresh } = await useFetch<BarangRusakResponse>("/api/barang-rusak
     search: search.value,
     page: page.value,
     limit: 20,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
   })),
-  watch: [search, page, sortBy, sortOrder],
+  watch: [search, page, sortBy, sortOrder, startDate, endDate],
 });
 
 const form = ref({
@@ -44,18 +55,26 @@ const unitOptions = computed(
     })) || [],
 );
 
-const columns = [
-  { id: "unit", accessorKey: "unitBarangId", header: "Unit" },
-  {
-    id: "barang",
-    accessorKey: "unitBarang.masterBarang.namaBarang",
-    header: "Barang",
-  },
-  { id: "ruang", accessorKey: "ruang.namaRuang", header: "Ruang" },
-  { id: "tanggal", accessorKey: "tanggalKejadian", header: "Tanggal", sortable: true },
-  { id: "keterangan", accessorKey: "keterangan", header: "Keterangan" },
-  { id: "user", accessorKey: "user.name", header: "Pelapor" },
-];
+const columns = computed(() => {
+  const cols: any[] = [
+    { id: "unit", accessorKey: "unitBarangId", header: "Unit" },
+    {
+      id: "barang",
+      accessorKey: "unitBarang.masterBarang.namaBarang",
+      header: "Barang",
+    },
+    { id: "ruang", accessorKey: "ruang.namaRuang", header: "Ruang" },
+  ];
+  if (isAdmin() || isKepsek()) {
+    cols.push({ id: "kerugian", header: "Estimasi Kerugian" });
+  }
+  cols.push(
+    { id: "tanggal", accessorKey: "tanggalKejadian", header: "Tanggal", sortable: true },
+    { id: "keterangan", accessorKey: "keterangan", header: "Keterangan" },
+    { id: "user", accessorKey: "user.name", header: "Pelapor" }
+  );
+  return cols;
+});
 
 async function handleSubmit() {
   loading.value = true;
@@ -93,6 +112,20 @@ async function handleSubmit() {
         >Lapor</UButton
       >
     </div>
+    <div class="flex gap-3 flex-wrap items-center">
+      <UInput
+        v-model="search"
+        placeholder="Cari unit / barang / keterangan..."
+        icon="i-heroicons-magnifying-glass"
+        class="max-w-sm"
+      />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rentang:</span>
+        <UInput v-model="startDate" type="date" class="w-40" />
+        <span class="text-gray-500">-</span>
+        <UInput v-model="endDate" type="date" class="w-40" />
+      </div>
+    </div>
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #barang-cell="{ row }">{{
         row.original.unitBarang?.masterBarang?.namaBarang
@@ -100,6 +133,9 @@ async function handleSubmit() {
       <template #ruang-cell="{ row }">{{
         row.original.ruang?.namaRuang
       }}</template>
+      <template #kerugian-cell="{ row }">
+        {{ formatRupiah(row.original.unitBarang?.masterBarang?.hargaSatuan || 0) }}
+      </template>
       <template #tanggal-cell="{ row }">{{
         row.original.tanggalKejadian
           ? new Date(row.original.tanggalKejadian).toLocaleDateString("id-ID")

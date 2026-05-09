@@ -1,7 +1,10 @@
 <script setup lang="ts">
 definePageMeta({ layout: "admin", middleware: "auth" });
 const toast = useToast();
-const { hasPermission } = usePermission();
+import { computed } from 'vue';
+import { useCurrency } from '~/composables/useCurrency';
+const { formatRupiah } = useCurrency();
+const { hasPermission, isAdmin, isKepsek } = usePermission();
 const search = ref("");
 const page = ref(1);
 const sortBy = ref('createdAt');
@@ -31,15 +34,21 @@ const { data, refresh } = await useFetch<MasterBarangResponse>("/api/master-bara
   watch: [search, page, kategoriFilter, sortBy, sortOrder],
 });
 
-const columns = [
-  { id: "kode", accessorKey: "kodeMaster", header: "Kode" },
-  { id: "nama", accessorKey: "namaBarang", header: "Nama Barang" },
-  { id: "kategori", accessorKey: "kategori.namaKategori", header: "Kategori" },
-  { id: "merk", accessorKey: "merk", header: "Merk" },
-  { id: "stok", accessorKey: "unitBarang._count", header: "Unit Aktif" },
-  { id: "min_stok", accessorKey: "reorderPoint", header: "Min. Stok" },
-  { id: "actions", header: "Aksi" },
-];
+const columns = computed(() => {
+  const cols: any[] = [
+    { id: "kode", accessorKey: "kodeMaster", header: "Kode", sortable: true },
+    { id: "nama", accessorKey: "namaBarang", header: "Nama Barang", sortable: true },
+    { id: "kategori", accessorKey: "kategori.namaKategori", header: "Kategori", sortable: true },
+    { id: "merk", accessorKey: "merk", header: "Merk", sortable: true },
+    { id: "stok", accessorKey: "unitBarang._count", header: "Unit Aktif", sortable: true },
+    { id: "min_stok", accessorKey: "reorderPoint", header: "Min. Stok", sortable: true },
+  ];
+  if (isAdmin() || isKepsek()) {
+    cols.push({ id: "valuasi", header: "Total Valuasi", sortable: true });
+  }
+  cols.push({ id: "actions", header: "Aksi" });
+  return cols;
+});
 </script>
 
 <template>
@@ -80,6 +89,9 @@ const columns = [
         >
           {{ row.original._count?.unitBarang || 0 }}
         </UBadge>
+      </template>
+      <template #valuasi-cell="{ row }">
+        {{ formatRupiah((row.original._count?.unitBarang || 0) * (row.original.hargaSatuan || 0)) }}
       </template>
       <template #actions-cell="{ row }">
         <div class="flex gap-1">

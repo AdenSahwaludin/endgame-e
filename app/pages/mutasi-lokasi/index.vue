@@ -8,6 +8,12 @@ const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
 const showCreate = ref(false);
 const loading = ref(false);
+const startDate = ref("");
+const endDate = ref("");
+
+watch([search, startDate, endDate], () => {
+  page.value = 1;
+});
 
 interface MutasiLokasiResponse {
   data: any[];
@@ -23,8 +29,10 @@ const { data, refresh } = await useFetch<MutasiLokasiResponse>("/api/mutasi-loka
     search: search.value,
     page: page.value,
     limit: 20,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
   })),
-  watch: [search, page, sortBy, sortOrder],
+  watch: [search, page, sortBy, sortOrder, startDate, endDate],
 });
 
 const { data: units } = await useFetch("/api/unit-barang", {
@@ -95,7 +103,7 @@ async function handleCreateMutasi() {
   }
 }
 
-const columns = [
+const columns: any[] = [
   { id: "unit", accessorKey: "unitBarangId", header: "Unit" },
   {
     id: "barang",
@@ -123,6 +131,20 @@ const columns = [
       >
         Mutasi Baru
       </UButton>
+    </div>
+    <div class="flex gap-3 flex-wrap items-center">
+      <UInput
+        v-model="search"
+        placeholder="Cari unit / barang / keterangan..."
+        icon="i-heroicons-magnifying-glass"
+        class="max-w-sm"
+      />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rentang:</span>
+        <UInput v-model="startDate" type="date" class="w-40" />
+        <span class="text-gray-500">-</span>
+        <UInput v-model="endDate" type="date" class="w-40" />
+      </div>
     </div>
 
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">

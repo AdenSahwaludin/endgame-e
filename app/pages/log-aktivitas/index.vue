@@ -3,6 +3,14 @@ definePageMeta({ layout: "admin", middleware: "auth" });
 const page = ref(1);
 const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
+const search = ref("");
+const startDate = ref("");
+const endDate = ref("");
+
+watch([search, startDate, endDate], () => {
+  page.value = 1;
+});
+
 interface LogAktivitasResponse {
   data: any[];
   total: number;
@@ -14,13 +22,16 @@ const { data } = await useFetch<LogAktivitasResponse>("/api/log-aktivitas", {
   query: computed(() => ({
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,
+    search: search.value,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
     page: page.value,
     limit: 50,
   })),
-  watch: [page, sortBy, sortOrder],
+  watch: [page, sortBy, sortOrder, search, startDate, endDate],
 });
 
-const columns = [
+const columns: any[] = [
   { id: "waktu", accessorKey: "createdAt", header: "Waktu" },
   { id: "user", accessorKey: "user.name", header: "User" },
   { id: "jenis", accessorKey: "jenisAktivitas", header: "Jenis" },
@@ -43,6 +54,20 @@ const jenisColor = (j: string) =>
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
       Log Aktivitas
     </h2>
+    <div class="flex gap-3 flex-wrap items-center">
+      <UInput
+        v-model="search"
+        placeholder="Cari deskripsi / aktivitas..."
+        icon="i-heroicons-magnifying-glass"
+        class="max-w-sm"
+      />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rentang:</span>
+        <UInput v-model="startDate" type="date" class="w-40" />
+        <span class="text-gray-500">-</span>
+        <UInput v-model="endDate" type="date" class="w-40" />
+      </div>
+    </div>
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
       <template #waktu-cell="{ row }">{{
         new Date(row.original.createdAt).toLocaleString("id-ID")

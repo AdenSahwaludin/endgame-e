@@ -18,6 +18,27 @@ export default defineEventHandler(async (event) => {
     ];
   }
 
+  // Handle special sorting for 'valuasi' (Unit Aktif * Harga Satuan)
+  if (sortBy === 'valuasi') {
+    const allData = await prisma.masterBarang.findMany({
+      where,
+      include: {
+        kategori: true,
+        _count: { select: { unitBarang: { where: { isActive: true } } } },
+      },
+    });
+
+    const sortedData = allData.sort((a, b) => {
+      const valA = (a._count?.unitBarang || 0) * (Number(a.hargaSatuan) || 0);
+      const valB = (b._count?.unitBarang || 0) * (Number(b.hargaSatuan) || 0);
+      return sortOrder === 'asc' ? valA - valB : valB - valA;
+    });
+
+    const total = sortedData.length;
+    const pagedData = sortedData.slice((page - 1) * limit, page * limit);
+    return { data: pagedData, total, page, limit };
+  }
+
   const [data, total] = await Promise.all([
     prisma.masterBarang.findMany({
       where,

@@ -8,11 +8,10 @@ const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
 const statusFilter = ref<string | null>(null);
 
-watch(search, () => {
-  page.value = 1;
-});
+const startDate = ref("");
+const endDate = ref("");
 
-watch(statusFilter, () => {
+watch([search, statusFilter, startDate, endDate], () => {
   page.value = 1;
 });
 
@@ -31,8 +30,10 @@ const { data, refresh } = await useFetch<TransaksiKeluarResponse>("/api/transaks
     page: page.value,
     limit: 20,
     status: statusFilter.value || undefined,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
   })),
-  watch: [search, page, statusFilter, sortBy, sortOrder],
+  watch: [search, page, statusFilter, sortBy, sortOrder, startDate, endDate],
 });
 
 const columns = [
@@ -163,8 +164,14 @@ async function handleReturn(id: number) {
             { label: 'Rejected', value: 'rejected' },
           ]"
           value-key="value"
-          class="w-40"
+          class="w-36"
         />
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rentang:</span>
+        <UInput v-model="startDate" type="date" class="w-40" />
+        <span class="text-gray-500">-</span>
+        <UInput v-model="endDate" type="date" class="w-40" />
       </div>
     </div>
 
