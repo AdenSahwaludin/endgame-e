@@ -22,19 +22,22 @@ interface TransaksiKeluarResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<TransaksiKeluarResponse>("/api/transaksi-keluar", {
-  query: computed(() => ({
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    search: search.value,
-    page: page.value,
-    limit: 20,
-    status: statusFilter.value || undefined,
-    startDate: startDate.value || undefined,
-    endDate: endDate.value || undefined,
-  })),
-  watch: [search, page, statusFilter, sortBy, sortOrder, startDate, endDate],
-});
+const { data, refresh } = await useAsyncData(
+  'transaksi-keluar-list',
+  () => $fetch<TransaksiKeluarResponse>('/api/transaksi-keluar', {
+    query: {
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      search: search.value,
+      page: page.value,
+      limit: 20,
+      status: statusFilter.value || undefined,
+      startDate: startDate.value || undefined,
+      endDate: endDate.value || undefined,
+    }
+  }),
+  { watch: [page, search, statusFilter, sortBy, sortOrder, startDate, endDate] }
+);
 
 const columns = [
   { id: "kode", accessorKey: "kodeTransaksi", header: "Kode", sortable: true },
@@ -240,7 +243,7 @@ async function handleReturn(id: number) {
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

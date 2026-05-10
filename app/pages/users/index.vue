@@ -17,16 +17,19 @@ interface UsersResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<UsersResponse>("/api/users", {
-  query: computed(() => ({
-    search: search.value,
-    page: page.value,
-    limit: 20,
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-  })),
-  watch: [search, page, sortBy, sortOrder],
-});
+const { data, refresh } = await useAsyncData(
+  'users-list',
+  () => $fetch<UsersResponse>('/api/users', {
+    query: {
+      search: search.value,
+      page: page.value,
+      limit: 20,
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+    }
+  }),
+  { watch: [page, search, sortBy, sortOrder] }
+);
 
 const form = ref({
   name: "",
@@ -92,7 +95,7 @@ async function handleCreate() {
       >
       <template #isActive-cell="{ row }"
         ><UBadge
-          :color="row.original.isActive ? 'green' : 'red'"
+          :color="row.original.isActive ? 'success' : 'error'"
           variant="subtle"
           >{{ row.original.isActive ? "Aktif" : "Non-aktif" }}</UBadge
         ></template
@@ -101,7 +104,7 @@ async function handleCreate() {
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

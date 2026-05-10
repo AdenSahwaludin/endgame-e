@@ -23,19 +23,21 @@ interface UnitBarangResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<UnitBarangResponse>("/api/unit-barang", {
-  key: "unit-barang-list",
-  query: computed(() => ({
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    search: search.value,
-    page: page.value,
-    limit: 20,
-    status: statusFilter.value || undefined,
-    activeOnly: "false",
-  })),
-  watch: [search, page, statusFilter, sortBy, sortOrder],
-});
+const { data, refresh } = await useAsyncData(
+  'unit-barang-list',
+  () => $fetch<UnitBarangResponse>('/api/unit-barang', {
+    query: {
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      search: search.value,
+      page: page.value,
+      limit: 20,
+      status: statusFilter.value || undefined,
+      activeOnly: 'false',
+    }
+  }),
+  { watch: [page, search, statusFilter, sortBy, sortOrder] }
+);
 
 // Scroll to top on page change
 watch(page, () => {
@@ -153,8 +155,8 @@ async function toggleUnit(unit: any) {
     </AppTable>
     <div class="flex justify-center">
       <UPagination
-        v-if="data"
-        v-model="page"
+        v-if="data && data.total > 20"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

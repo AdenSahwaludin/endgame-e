@@ -18,18 +18,21 @@ interface LogAktivitasResponse {
   limit: number;
 }
 
-const { data } = await useFetch<LogAktivitasResponse>("/api/log-aktivitas", {
-  query: computed(() => ({
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    search: search.value,
-    startDate: startDate.value || undefined,
-    endDate: endDate.value || undefined,
-    page: page.value,
-    limit: 50,
-  })),
-  watch: [page, sortBy, sortOrder, search, startDate, endDate],
-});
+const { data } = await useAsyncData(
+  'log-aktivitas-list',
+  () => $fetch<LogAktivitasResponse>('/api/log-aktivitas', {
+    query: {
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      search: search.value,
+      startDate: startDate.value || undefined,
+      endDate: endDate.value || undefined,
+      page: page.value,
+      limit: 50,
+    }
+  }),
+  { watch: [page, sortBy, sortOrder, search, startDate, endDate] }
+);
 
 const columns: any[] = [
   { id: "waktu", accessorKey: "createdAt", header: "Waktu" },
@@ -84,7 +87,7 @@ const jenisColor = (j: string) =>
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

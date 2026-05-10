@@ -28,18 +28,21 @@ interface BarangRusakResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<BarangRusakResponse>("/api/barang-rusak", {
-  query: computed(() => ({
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    search: search.value,
-    page: page.value,
-    limit: 20,
-    startDate: startDate.value || undefined,
-    endDate: endDate.value || undefined,
-  })),
-  watch: [search, page, sortBy, sortOrder, startDate, endDate],
-});
+const { data, refresh } = await useAsyncData(
+  'barang-rusak-list',
+  () => $fetch<BarangRusakResponse>('/api/barang-rusak', {
+    query: {
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      search: search.value,
+      page: page.value,
+      limit: 20,
+      startDate: startDate.value || undefined,
+      endDate: endDate.value || undefined,
+    }
+  }),
+  { watch: [page, search, sortBy, sortOrder, startDate, endDate] }
+);
 
 const form = ref({
   unitBarangId: "",
@@ -146,7 +149,7 @@ async function handleSubmit() {
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

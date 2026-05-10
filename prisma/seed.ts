@@ -184,12 +184,17 @@ async function main() {
   console.log(`✅ ${units.length} Unit Barang created (Capped at 50)`)
 
   // 9. Create Transaksi Barang (Sync with auto-gen pattern)
-  const dateStr = '20260507'
+  const now = new Date()
+  const dateStr = now.getFullYear().toString() +
+    String(now.getMonth() + 1).padStart(2, '0') +
+    String(now.getDate()).padStart(2, '0')
+  const isoDate = now.toISOString().split('T')[0]
+
   const pengadaan = [
-    { kode: `TRX-PENGADAAN-${dateStr}-001`, mb: 'ELE-001', qty: 2, status: 'approved', space: 8, date: '2026-05-07', appBy: kepsekUser.id },
-    { kode: `TRX-PENGADAAN-${dateStr}-002`, mb: 'APE-001', qty: 5, status: 'pending', space: 1, date: '2026-05-07' },
-    { kode: `TRX-PENGADAAN-${dateStr}-003`, mb: 'ART-002', qty: 3, status: 'rejected', space: 10, date: '2026-05-07', appBy: kepsekUser.id },
-    { kode: `TRX-PENGADAAN-${dateStr}-004`, mb: 'KES-001', qty: 1, status: 'approved', space: 8, date: '2026-05-07', appBy: kepsekUser.id },
+    { kode: `TRX-PENGADAAN-${dateStr}-001`, mb: 'ELE-001', qty: 2, status: 'approved', space: 8, date: isoDate, appBy: kepsekUser.id },
+    { kode: `TRX-PENGADAAN-${dateStr}-002`, mb: 'APE-001', qty: 5, status: 'pending', space: 1, date: isoDate },
+    { kode: `TRX-PENGADAAN-${dateStr}-003`, mb: 'ART-002', qty: 3, status: 'rejected', space: 10, date: isoDate, appBy: kepsekUser.id },
+    { kode: `TRX-PENGADAAN-${dateStr}-004`, mb: 'KES-001', qty: 1, status: 'approved', space: 8, date: isoDate, appBy: kepsekUser.id },
   ]
 
   for (const p of pengadaan) {
@@ -212,9 +217,9 @@ async function main() {
 
   // 10. Create Transaksi Keluar (Sync with auto-gen pattern)
   const keluar = [
-    { kode: `TRX-ASET-${dateStr}-001`, unit: 'APE01-IND-1', type: 'peminjaman', status: 'approved', from: 1, to: 2, date: '2026-05-07', appBy: adminUser.id },
-    { kode: `TRX-ASET-${dateStr}-002`, unit: 'TKA-MJA-1', type: 'pemindahan', status: 'pending', from: 2, to: 7, date: '2026-05-07' },
-    { kode: `TRX-ASET-${dateStr}-003`, unit: 'SPK-GYM-01', type: 'peminjaman', status: 'approved', from: 10, to: 6, date: '2026-05-07', appBy: kepsekUser.id },
+    { kode: `TRX-ASET-${dateStr}-001`, unit: 'APE01-IND-1', type: 'peminjaman', status: 'approved', from: 1, to: 2, date: isoDate, appBy: adminUser.id },
+    { kode: `TRX-ASET-${dateStr}-002`, unit: 'TKA-MJA-1', type: 'pemindahan', status: 'pending', from: 2, to: 7, date: isoDate },
+    { kode: `TRX-ASET-${dateStr}-003`, unit: 'SPK-GYM-01', type: 'peminjaman', status: 'approved', from: 10, to: 6, date: isoDate, appBy: kepsekUser.id },
   ]
 
   for (const o of keluar) {
@@ -237,10 +242,15 @@ async function main() {
   console.log('✅ Sync Transaksi Keluar created')
 
   // 11. Broken Items & Mutations
+  const lastMonth = new Date(now)
+  lastMonth.setMonth(now.getMonth() - 1)
+  const twoMonthsAgo = new Date(now)
+  twoMonthsAgo.setMonth(now.getMonth() - 2)
+
   await prisma.barangRusak.createMany({
     data: [
-      { unitBarangId: 'APE02-PZL-6', ruangId: 2, tanggalKejadian: new Date('2026-04-10'), keterangan: 'Pecah saat dimainkan', penanggungJawab: 'Ibu Ratna', userId: petugasUser.id },
-      { unitBarangId: 'TKA-KRS-5', ruangId: 2, tanggalKejadian: new Date('2026-02-15'), keterangan: 'Baut lepas', penanggungJawab: 'Mas Budi', userId: petugasUser.id },
+      { unitBarangId: 'APE02-PZL-6', ruangId: 2, tanggalKejadian: lastMonth, keterangan: 'Pecah saat dimainkan', penanggungJawab: 'Ibu Ratna', userId: petugasUser.id },
+      { unitBarangId: 'TKA-KRS-5', ruangId: 2, tanggalKejadian: twoMonthsAgo, keterangan: 'Baut lepas', penanggungJawab: 'Mas Budi', userId: petugasUser.id },
     ]
   })
 
@@ -249,7 +259,7 @@ async function main() {
       unitBarangId: 'TV-TKB-01',
       ruangAsalId: 7,
       ruangTujuanId: 3,
-      tanggalMutasi: new Date('2026-01-20'),
+      tanggalMutasi: twoMonthsAgo,
       tipeMutasi: 'manual',
       keterangan: 'Pemasangan awal di TKB',
       userId: petugasUser.id

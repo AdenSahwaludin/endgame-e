@@ -22,18 +22,21 @@ interface MutasiLokasiResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<MutasiLokasiResponse>("/api/mutasi-lokasi", {
-  query: computed(() => ({
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    search: search.value,
-    page: page.value,
-    limit: 20,
-    startDate: startDate.value || undefined,
-    endDate: endDate.value || undefined,
-  })),
-  watch: [search, page, sortBy, sortOrder, startDate, endDate],
-});
+const { data, refresh } = await useAsyncData(
+  'mutasi-lokasi-list',
+  () => $fetch<MutasiLokasiResponse>('/api/mutasi-lokasi', {
+    query: {
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      search: search.value,
+      page: page.value,
+      limit: 20,
+      startDate: startDate.value || undefined,
+      endDate: endDate.value || undefined,
+    }
+  }),
+  { watch: [page, search, sortBy, sortOrder, startDate, endDate] }
+);
 
 const { data: units } = await useFetch("/api/unit-barang", {
   query: { limit: 500, activeOnly: "true" },
@@ -170,7 +173,7 @@ const columns: any[] = [
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

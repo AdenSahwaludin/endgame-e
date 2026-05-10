@@ -23,16 +23,19 @@ interface KategoriResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<KategoriResponse>("/api/kategori", {
-  query: computed(() => ({
-    search: search.value,
-    page: page.value,
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    limit: 20,
-  })),
-  watch: [search, page, sortBy, sortOrder],
-});
+const { data, refresh } = await useAsyncData(
+  'kategori-list',
+  () => $fetch<KategoriResponse>('/api/kategori', {
+    query: {
+      search: search.value,
+      page: page.value,
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      limit: 20,
+    }
+  }),
+  { watch: [page, search, sortBy, sortOrder] }
+);
 
 const columns = [
   { id: "kode", accessorKey: "kodeKategori", header: "Kode", sortable: true },
@@ -165,7 +168,7 @@ async function handleDelete(id: string) {
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

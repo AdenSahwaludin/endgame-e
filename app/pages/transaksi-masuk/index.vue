@@ -24,19 +24,22 @@ interface TransaksiMasukResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<TransaksiMasukResponse>("/api/transaksi-masuk", {
-  query: computed(() => ({
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    search: search.value,
-    page: page.value,
-    limit: 20,
-    status: statusFilter.value || undefined,
-    startDate: startDate.value || undefined,
-    endDate: endDate.value || undefined,
-  })),
-  watch: [search, page, statusFilter, sortBy, sortOrder, startDate, endDate],
-});
+const { data, refresh } = await useAsyncData(
+  'transaksi-masuk-list',
+  () => $fetch<TransaksiMasukResponse>('/api/transaksi-masuk', {
+    query: {
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      search: search.value,
+      page: page.value,
+      limit: 20,
+      status: statusFilter.value || undefined,
+      startDate: startDate.value || undefined,
+      endDate: endDate.value || undefined,
+    }
+  }),
+  { watch: [page, search, statusFilter, sortBy, sortOrder, startDate, endDate] }
+);
 
 const columns = computed(() => {
   const cols: any[] = [
@@ -222,7 +225,7 @@ async function handleReject(id: number) {
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />

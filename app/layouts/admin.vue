@@ -234,16 +234,21 @@ const navigation = computed(() => {
           </h1>
         </div>
         <div class="flex items-center gap-3">
-          <UButton
-            :icon="isDarkMode ? 'i-heroicons-sun' : 'i-heroicons-moon'"
-            :title="isDarkMode ? 'Aktifkan light mode' : 'Aktifkan dark mode'"
-            aria-label="Toggle dark mode"
-            variant="soft"
-            color="primary"
-            size="sm"
-            class="rounded-xl"
-            @click="toggleColorMode"
-          />
+          <ClientOnly>
+            <UButton
+              :icon="isDarkMode ? 'i-heroicons-sun' : 'i-heroicons-moon'"
+              :title="isDarkMode ? 'Aktifkan light mode' : 'Aktifkan dark mode'"
+              aria-label="Toggle dark mode"
+              variant="soft"
+              color="primary"
+              size="sm"
+              class="rounded-xl"
+              @click="toggleColorMode"
+            />
+            <template #fallback>
+              <div class="w-8 h-8"></div>
+            </template>
+          </ClientOnly>
           <div
             class="flex items-center gap-2 rounded-full border border-gray-200/80 dark:border-gray-700/80 bg-gray-50/80 dark:bg-gray-800/60 px-3 py-1.5 shadow-sm"
           >

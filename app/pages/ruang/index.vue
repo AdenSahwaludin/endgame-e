@@ -23,16 +23,19 @@ interface RuangResponse {
   limit: number;
 }
 
-const { data, refresh } = await useFetch<RuangResponse>("/api/ruang", {
-  query: computed(() => ({
-    search: search.value,
-    page: page.value,
-    sortBy: sortBy.value,
-    sortOrder: sortOrder.value,
-    limit: 20,
-  })),
-  watch: [search, page, sortBy, sortOrder],
-});
+const { data, refresh } = await useAsyncData(
+  'ruang-list',
+  () => $fetch<RuangResponse>('/api/ruang', {
+    query: {
+      search: search.value,
+      page: page.value,
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      limit: 20,
+    }
+  }),
+  { watch: [page, search, sortBy, sortOrder] }
+);
 
 const columns = [
   { id: "id", accessorKey: "id", header: "ID" },
@@ -138,7 +141,7 @@ async function handleDelete(id: number) {
     <div class="flex justify-center">
       <UPagination
         v-if="data"
-        v-model="page"
+        v-model:page="page"
         :total="data.total"
         :items-per-page="20"
       />
