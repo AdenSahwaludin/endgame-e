@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Starting Expanded Seeder...')
+  console.log('🌱 Starting Expanded Massive Seeder...')
 
   // 1. Permissions
   const permissionNames = [
@@ -24,7 +24,7 @@ async function main() {
   for (const name of permissionNames) {
     await prisma.permission.upsert({ where: { name }, update: {}, create: { name } })
   }
-  console.log(`✅ Permissions verified`)
+  console.log('✅ Permissions verified')
 
   // 2. Roles
   const adminRole = await prisma.role.upsert({ where: { name: 'Admin' }, update: {}, create: { name: 'Admin' } })
@@ -32,7 +32,6 @@ async function main() {
   const petugasRole = await prisma.role.upsert({ where: { name: 'Petugas Inventaris' }, update: {}, create: { name: 'Petugas Inventaris' } })
 
   const allPerms = await prisma.permission.findMany()
-
   // Admin: All perms
   for (const perm of allPerms) {
     await prisma.rolePermission.upsert({
@@ -41,38 +40,6 @@ async function main() {
       create: { roleId: adminRole.id, permissionId: perm.id },
     })
   }
-
-  // Kepala Sekolah: View all + Approvals + Reports
-  const kepsekPerms = allPerms.filter(p =>
-    p.name.startsWith('view_') ||
-    p.name.includes('approve_') ||
-    ['generate_laporan', 'export_data'].includes(p.name)
-  )
-  for (const perm of kepsekPerms) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: kepsekRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: kepsekRole.id, permissionId: perm.id },
-    })
-  }
-
-  // Petugas: View all + Create/Edit (except approve and delete)
-  const petugasPerms = allPerms.filter(p =>
-    p.name.startsWith('view_') ||
-    p.name.startsWith('create_') ||
-    p.name.startsWith('edit_') ||
-    p.name.includes('nonaktifkan_')
-  ).filter(p => !p.name.includes('delete_') && !p.name.includes('approve_'))
-
-  for (const perm of petugasPerms) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: petugasRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: petugasRole.id, permissionId: perm.id },
-    })
-  }
-
-  console.log('✅ Roles and Permissions assigned')
 
   // 3. Users
   const hashedPassword = await bcrypt.hash('password', 12)
@@ -137,145 +104,138 @@ async function main() {
   await prisma.kategori.createMany({ data: kategoris })
   console.log('✅ Kategori created')
 
-  // 7. Create Master Barang
+  // 7. Create Master Barang (Tepat 24 Jenis)
   const masterBarangs = [
-    { kodeMaster: 'APE-001', namaBarang: 'Lego Duplo 100pcs', kategoriId: 'APE-D', satuan: 'set', merk: 'Lego', hargaSatuan: 450000, reorderPoint: 2 },
-    { kodeMaster: 'APE-002', namaBarang: 'Puzzle Kayu Hijaiyah', kategoriId: 'APE-D', satuan: 'pcs', merk: 'EduToys', hargaSatuan: 35000, reorderPoint: 5 },
-    { kodeMaster: 'APE-003', namaBarang: 'Balok Kayu Warna 50pcs', kategoriId: 'APE-D', satuan: 'set', merk: 'EduToys', hargaSatuan: 120000, reorderPoint: 3 },
-    { kodeMaster: 'APE-L01', namaBarang: 'Perosotan Plastik Medium', kategoriId: 'APE-L', satuan: 'unit', merk: 'Labeille', hargaSatuan: 1200000, reorderPoint: 1 },
-    { kodeMaster: 'APE-L02', namaBarang: 'Ayunan Duduk 2 Kursi', kategoriId: 'APE-L', satuan: 'unit', merk: 'Local', hargaSatuan: 2500000, reorderPoint: 1 },
-    { kodeMaster: 'MEB-001', namaBarang: 'Meja Belajar Anak Persegi', kategoriId: 'MEB', satuan: 'unit', merk: 'Informa', hargaSatuan: 350000, reorderPoint: 10 },
-    { kodeMaster: 'MEB-002', namaBarang: 'Kursi Anak Plastik Warna', kategoriId: 'MEB', satuan: 'unit', merk: 'Napolly', hargaSatuan: 85000, reorderPoint: 20 },
-    { kodeMaster: 'MEB-003', namaBarang: 'Lemari Loker 12 Pintu', kategoriId: 'MEB', satuan: 'unit', merk: 'Lion', hargaSatuan: 1800000, reorderPoint: 2 },
-    { kodeMaster: 'MEB-004', namaBarang: 'Kasur Busa Day Care', kategoriId: 'MEB', satuan: 'unit', merk: 'Inoac', hargaSatuan: 400000, reorderPoint: 5 },
-    { kodeMaster: 'ELE-001', namaBarang: 'Speaker Portable 12 Inch', kategoriId: 'ELE', satuan: 'unit', merk: 'Polytron', hargaSatuan: 1500000, reorderPoint: 1 },
-    { kodeMaster: 'ELE-002', namaBarang: 'Smart TV 43 Inch', kategoriId: 'ELE', satuan: 'unit', merk: 'Samsung', hargaSatuan: 4200000, reorderPoint: 1 },
-    { kodeMaster: 'ELE-003', namaBarang: 'AC Split 1/2 PK', kategoriId: 'ELE', satuan: 'unit', merk: 'LG', hargaSatuan: 3200000, reorderPoint: 1 },
-    { kodeMaster: 'OLA-001', namaBarang: 'Bola Plastik 100pcs', kategoriId: 'OLA', satuan: 'karung', merk: 'Local', hargaSatuan: 150000, reorderPoint: 2 },
-    { kodeMaster: 'ART-001', namaBarang: 'Keyboard Yamaha', kategoriId: 'ART', satuan: 'unit', merk: 'Yamaha', hargaSatuan: 2200000, reorderPoint: 1 },
-    { kodeMaster: 'ART-002', namaBarang: 'Set Perkusi Anak', kategoriId: 'ART', satuan: 'set', merk: 'EduToys', hargaSatuan: 450000, reorderPoint: 2 },
-    { kodeMaster: 'BUK-001', namaBarang: 'Seri Cerita Nabi 25 Judul', kategoriId: 'BUK', satuan: 'set', merk: 'Mizan', hargaSatuan: 750000, reorderPoint: 1 },
-    { kodeMaster: 'KES-001', namaBarang: 'Peralatan UKS Lengkap', kategoriId: 'KES', satuan: 'set', merk: 'Onemed', hargaSatuan: 850000, reorderPoint: 1 },
+    { kodeMaster: 'APE-001', namaBarang: 'Lego Duplo 100pcs', kategoriId: 'APE-D', satuan: 'set', hargaSatuan: 450000 },
+    { kodeMaster: 'APE-002', namaBarang: 'Puzzle Kayu Hijaiyah', kategoriId: 'APE-D', satuan: 'pcs', hargaSatuan: 35000 },
+    { kodeMaster: 'APE-003', namaBarang: 'Balok Kayu Warna 50pcs', kategoriId: 'APE-D', satuan: 'set', hargaSatuan: 120000 },
+    { kodeMaster: 'APE-L01', namaBarang: 'Perosotan Plastik Medium', kategoriId: 'APE-L', satuan: 'unit', hargaSatuan: 1200000 },
+    { kodeMaster: 'APE-L02', namaBarang: 'Ayunan Duduk 2 Kursi', kategoriId: 'APE-L', satuan: 'unit', hargaSatuan: 2500000 },
+    { kodeMaster: 'MEB-001', namaBarang: 'Meja Belajar Anak Persegi', kategoriId: 'MEB', satuan: 'unit', hargaSatuan: 350000 },
+    { kodeMaster: 'MEB-002', namaBarang: 'Kursi Anak Plastik Warna', kategoriId: 'MEB', satuan: 'unit', hargaSatuan: 85000 },
+    { kodeMaster: 'MEB-003', namaBarang: 'Lemari Loker 12 Pintu', kategoriId: 'MEB', satuan: 'unit', hargaSatuan: 1800000 },
+    { kodeMaster: 'MEB-004', namaBarang: 'Kasur Busa Day Care', kategoriId: 'MEB', satuan: 'unit', hargaSatuan: 400000 },
+    { kodeMaster: 'ELE-001', namaBarang: 'Speaker Portable 12 Inch', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 1500000 },
+    { kodeMaster: 'ELE-002', namaBarang: 'Smart TV 43 Inch', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 4200000 },
+    { kodeMaster: 'ELE-003', namaBarang: 'AC Split 1/2 PK', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 3200000 },
+    { kodeMaster: 'OLA-001', namaBarang: 'Bola Plastik 100pcs', kategoriId: 'OLA', satuan: 'karung', hargaSatuan: 150000 },
+    { kodeMaster: 'ART-001', namaBarang: 'Keyboard Yamaha', kategoriId: 'ART', satuan: 'unit', hargaSatuan: 2200000 },
+    { kodeMaster: 'ART-002', namaBarang: 'Set Perkusi Anak', kategoriId: 'ART', satuan: 'set', hargaSatuan: 450000 },
+    { kodeMaster: 'BUK-001', namaBarang: 'Seri Cerita Nabi 25 Judul', kategoriId: 'BUK', satuan: 'set', hargaSatuan: 750000 },
+    { kodeMaster: 'KES-001', namaBarang: 'Peralatan UKS Lengkap', kategoriId: 'KES', satuan: 'set', hargaSatuan: 850000 },
+    // 7 Data Baru
+    { kodeMaster: 'KES-002', namaBarang: 'Pipa PVC', kategoriId: 'KES', satuan: 'batang', hargaSatuan: 45000 },
+    { kodeMaster: 'ELE-004', namaBarang: 'Rice Cooker', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 550000 },
+    { kodeMaster: 'ELE-005', namaBarang: 'Printer L3110', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 2400000 },
+    { kodeMaster: 'MEB-005', namaBarang: 'Rak Sepatu Kayu', kategoriId: 'MEB', satuan: 'unit', hargaSatuan: 250000 },
+    { kodeMaster: 'ELE-006', namaBarang: 'Vacuum Cleaner', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 1100000 },
+    { kodeMaster: 'ELE-007', namaBarang: 'Dispenser Galon Atas', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 850000 },
+    { kodeMaster: 'ELE-008', namaBarang: 'Kipas Angin Dinding', kategoriId: 'ELE', satuan: 'unit', hargaSatuan: 320000 },
   ]
   await prisma.masterBarang.createMany({ data: masterBarangs })
-  console.log('✅ Master Barang created')
-
-  // 8. Create Unit Barang (Expanded for more variety)
-  const units: any[] = []
   const allMasterKeys = masterBarangs.map(m => m.kodeMaster)
+  console.log('✅ 24 Master Barang created')
 
-  for (let i = 0; i < 80; i++) {
-    const masterId = allMasterKeys[i % allMasterKeys.length]
-    const ruangId = (i % 12) + 1
-    const statusIdx = i % 10
-    let status = 'baik'
-    if (statusIdx === 7) status = 'rusak'
-    if (statusIdx === 8) status = 'dipinjam'
-    if (statusIdx === 9) status = 'dihapus'
-
+  // 8. Create Unit Barang (360 Aktif + Dinamis)
+  console.log('📦 Seeding 360+ Unit Barang...')
+  const units = []
+  // 360 Unit Aktif/Baik
+  for (let i = 1; i <= 360; i++) {
     units.push({
-      kodeUnit: `${masterId}-${String(i + 1).padStart(3, '0')}`,
-      masterBarangId: masterId,
-      ruangId: ruangId,
-      status: status,
+      kodeUnit: `UNIT-B-${String(i).padStart(3, '0')}`,
+      masterBarangId: allMasterKeys[i % 24],
+      ruangId: (i % 12) + 1,
+      status: 'baik',
       createdBy: petugasUser.id,
-      isActive: status !== 'dihapus'
+      isActive: true
     })
   }
-
+  // 40 Unit Dipinjam & 25 Unit Rusak
+  for (let i = 1; i <= 40; i++) {
+    units.push({
+      kodeUnit: `UNIT-P-${String(i).padStart(3, '0')}`,
+      masterBarangId: allMasterKeys[i % 24],
+      ruangId: (i % 12) + 1,
+      status: 'dipinjam',
+      createdBy: petugasUser.id,
+      isActive: true
+    })
+  }
+  for (let i = 1; i <= 25; i++) {
+    units.push({
+      kodeUnit: `UNIT-R-${String(i).padStart(3, '0')}`,
+      masterBarangId: allMasterKeys[i % 24],
+      ruangId: (i % 12) + 1,
+      status: 'rusak',
+      createdBy: petugasUser.id,
+      isActive: true
+    })
+  }
   await prisma.unitBarang.createMany({ data: units })
   const createdUnits = await prisma.unitBarang.findMany()
   console.log(`✅ ${createdUnits.length} Unit Barang created`)
 
-  // Helper for random dates in last 60 days
-  const getRandomDate = (daysBack = 60) => {
-    const d = new Date()
-    d.setDate(d.getDate() - Math.floor(Math.random() * daysBack))
-    return d
-  }
+  // Helper Tanggal Modulus 2026
+  const getModulusDate = (i: number) => new Date(2026, i % 12, (i % 28) + 1)
 
-  // 9. Create Transaksi Barang (25 records)
-  console.log('📦 Seeding 25 Transaksi Barang...')
-  for (let i = 1; i <= 25; i++) {
-    const status = ['approved', 'pending', 'rejected'][i % 3]
-    const isApproved = status === 'approved'
-    const isRejected = status === 'rejected'
-
+  // 9. Transaksi Barang (Pengadaan) - 60 Records
+  console.log('📈 Seeding 60 Transaksi Barang (Yearly Pattern)...')
+  for (let i = 1; i <= 60; i++) {
+    const status = i % 10 === 0 ? 'pending' : 'approved'
     await prisma.transaksiBarang.create({
       data: {
-        kodeTransaksi: `TRX-IN-${String(i).padStart(3, '0')}`,
-        masterBarangId: allMasterKeys[i % allMasterKeys.length],
-        tanggalTransaksi: getRandomDate(),
-        totalPesanan: Math.floor(Math.random() * 10) + 1,
-        penanggungJawab: ['Mas Budi', 'Ibu Ratna', 'Pak Eko'][i % 3],
+        kodeTransaksi: `TRX-IN-2026-${String(i).padStart(3, '0')}`,
+        masterBarangId: allMasterKeys[i % 24],
+        tanggalTransaksi: getModulusDate(i),
+        totalPesanan: Math.floor(Math.random() * 5) + 1,
+        penanggungJawab: 'Mas Budi',
         userId: petugasUser.id,
         approvalStatus: status as any,
-        approvedBy: (isApproved || isRejected) ? kepsekUser.id : null,
-        approvedAt: (isApproved || isRejected) ? getRandomDate(5) : null,
+        approvedBy: status === 'approved' ? kepsekUser.id : null,
+        approvedAt: status === 'approved' ? getModulusDate(i) : null,
         ruangTujuanId: (i % 12) + 1
       }
     })
   }
 
-  // 10. Create Transaksi Keluar (25 records)
-  console.log('📤 Seeding 25 Transaksi Keluar...')
-  const types = ['pemindahan', 'peminjaman', 'penggunaan', 'penghapusan']
-  for (let i = 1; i <= 25; i++) {
-    const unit = createdUnits[i % createdUnits.length]
-    const status = i % 5 === 0 ? 'pending' : 'approved'
-
+  // 10. Transaksi Keluar (Pengelolaan) - 50 Records
+  console.log('📉 Seeding 50 Transaksi Keluar (Yearly Pattern)...')
+  const types = ['peminjaman', 'penggunaan', 'pemindahan', 'penghapusan']
+  for (let i = 1; i <= 50; i++) {
+    const status = i % 8 === 0 ? 'pending' : 'approved'
     await prisma.transaksiKeluar.create({
       data: {
-        kodeTransaksi: `TRX-OUT-${String(i).padStart(3, '0')}`,
-        unitBarangId: unit.kodeUnit,
-        ruangAsalId: unit.ruangId,
-        ruangTujuanId: (unit.ruangId % 12) + 1,
-        tipe: types[i % types.length] as any,
-        tanggalTransaksi: getRandomDate(),
-        penerima: ['Guru Kelas', 'Staf TU', 'Yayasan'][i % 3],
+        kodeTransaksi: `TRX-OUT-2026-${String(i).padStart(3, '0')}`,
+        unitBarangId: createdUnits[i % createdUnits.length].kodeUnit,
+        ruangAsalId: (i % 12) + 1,
+        ruangTujuanId: ((i + 1) % 12) + 1,
+        tipe: types[i % 4] as any,
+        tanggalTransaksi: getModulusDate(i),
+        penerima: 'Guru/Staf',
         userId: petugasUser.id,
         approvalStatus: status as any,
         approvedBy: status === 'approved' ? adminUser.id : null,
-        approvedAt: status === 'approved' ? getRandomDate(5) : null
+        approvedAt: status === 'approved' ? getModulusDate(i) : null
       }
     })
   }
 
-  // 11. Barang Rusak (25 records)
-  console.log('⚠️ Seeding 25 Barang Rusak...')
-  for (let i = 1; i <= 25; i++) {
-    const unit = createdUnits[(i * 2) % createdUnits.length]
+  // 11. Barang Rusak - 30 Records
+  console.log('⚠️ Seeding 30 Laporan Barang Rusak...')
+  for (let i = 1; i <= 30; i++) {
     await prisma.barangRusak.create({
       data: {
-        unitBarangId: unit.kodeUnit,
-        ruangId: unit.ruangId,
-        tanggalKejadian: getRandomDate(30),
-        keterangan: ['Pecah', 'Lecet parah', 'Hilang komponen', 'Baut lepas', 'Kain robek'][i % 5],
-        penanggungJawab: 'Petugas Kebersihan',
+        unitBarangId: createdUnits[(i * 3) % createdUnits.length].kodeUnit,
+        ruangId: (i % 12) + 1,
+        tanggalKejadian: getModulusDate(i),
+        keterangan: 'Kerusakan terdeteksi saat inspeksi rutin',
+        penanggungJawab: 'Tim Sarpras',
         userId: petugasUser.id
       }
     })
   }
 
-  // 12. Mutasi Lokasi (25 records)
-  console.log('🔄 Seeding 25 Mutasi Lokasi...')
-  for (let i = 1; i <= 25; i++) {
-    const unit = createdUnits[(i * 3) % createdUnits.length]
-    await prisma.mutasiLokasi.create({
-      data: {
-        unitBarangId: unit.kodeUnit,
-        ruangAsalId: (unit.ruangId % 12) + 1,
-        ruangTujuanId: unit.ruangId,
-        tanggalMutasi: getRandomDate(90),
-        tipeMutasi: i % 2 === 0 ? 'transaksi' : 'manual',
-        keterangan: 'Penataan ulang aset rutin',
-        userId: petugasUser.id
-      }
-    })
-  }
-
-  console.log('✅ Final broken reports & Mutation logs created')
-  console.log('\n🎉 Seeding Completed Successfully!')
+  console.log('\n🎉 Massive Yearly Seeding Completed Successfully!')
 }
 
 main()
