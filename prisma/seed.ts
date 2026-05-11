@@ -160,111 +160,120 @@ async function main() {
   await prisma.masterBarang.createMany({ data: masterBarangs })
   console.log('✅ Master Barang created')
 
-  // 8. Create Unit Barang (Limited to ~50 units with variety)
+  // 8. Create Unit Barang (Expanded for more variety)
   const units: any[] = []
+  const allMasterKeys = masterBarangs.map(m => m.kodeMaster)
 
-  // APE Dalam units (10 units)
-  for (let i = 1; i <= 3; i++) units.push({ kodeUnit: `APE01-IND-${i}`, masterBarangId: 'APE-001', ruangId: 1, status: 'baik', createdBy: petugasUser.id })
-  for (let i = 1; i <= 7; i++) units.push({ kodeUnit: `APE02-PZL-${i}`, masterBarangId: 'APE-002', ruangId: 2, status: i > 5 ? 'rusak' : 'baik', createdBy: petugasUser.id })
+  for (let i = 0; i < 80; i++) {
+    const masterId = allMasterKeys[i % allMasterKeys.length]
+    const ruangId = (i % 12) + 1
+    const statusIdx = i % 10
+    let status = 'baik'
+    if (statusIdx === 7) status = 'rusak'
+    if (statusIdx === 8) status = 'dipinjam'
+    if (statusIdx === 9) status = 'dihapus'
 
-  // Furniture units (25 units)
-  for (let i = 1; i <= 8; i++) units.push({ kodeUnit: `TKA-MJA-${i}`, masterBarangId: 'MEB-001', ruangId: 2, status: 'baik', createdBy: petugasUser.id })
-  for (let i = 1; i <= 8; i++) units.push({ kodeUnit: `TKB-MJA-${i}`, masterBarangId: 'MEB-001', ruangId: 3, status: 'baik', createdBy: petugasUser.id })
-  for (let i = 1; i <= 9; i++) units.push({ kodeUnit: `TKA-KRS-${i}`, masterBarangId: 'MEB-002', ruangId: 2, status: i === 5 ? 'rusak' : 'baik', createdBy: petugasUser.id })
-
-  // Electronics, Arts, Books (15 units)
-  units.push({ kodeUnit: 'SPK-GYM-01', masterBarangId: 'ELE-001', ruangId: 10, status: 'dipinjam', createdBy: petugasUser.id })
-  units.push({ kodeUnit: 'TV-TKB-01', masterBarangId: 'ELE-002', ruangId: 3, status: 'baik', createdBy: petugasUser.id })
-  units.push({ kodeUnit: 'AC-TKA-01', masterBarangId: 'ELE-003', ruangId: 2, status: 'baik', createdBy: petugasUser.id })
-  units.push({ kodeUnit: 'KBD-MUS-01', masterBarangId: 'ART-001', ruangId: 10, status: 'baik', createdBy: petugasUser.id })
-  for (let i = 1; i <= 5; i++) units.push({ kodeUnit: `BUK-REL-${i}`, masterBarangId: 'BUK-001', ruangId: 9, status: 'baik', createdBy: petugasUser.id })
-  for (let i = 1; i <= 6; i++) units.push({ kodeUnit: `OLA-BLA-${i}`, masterBarangId: 'OLA-001', ruangId: 6, status: 'baik', createdBy: petugasUser.id })
+    units.push({
+      kodeUnit: `${masterId}-${String(i + 1).padStart(3, '0')}`,
+      masterBarangId: masterId,
+      ruangId: ruangId,
+      status: status,
+      createdBy: petugasUser.id,
+      isActive: status !== 'dihapus'
+    })
+  }
 
   await prisma.unitBarang.createMany({ data: units })
-  console.log(`✅ ${units.length} Unit Barang created (Capped at 50)`)
+  const createdUnits = await prisma.unitBarang.findMany()
+  console.log(`✅ ${createdUnits.length} Unit Barang created`)
 
-  // 9. Create Transaksi Barang (Sync with auto-gen pattern)
-  const now = new Date()
-  const dateStr = now.getFullYear().toString() +
-    String(now.getMonth() + 1).padStart(2, '0') +
-    String(now.getDate()).padStart(2, '0')
-  const isoDate = now.toISOString().split('T')[0]
+  // Helper for random dates in last 60 days
+  const getRandomDate = (daysBack = 60) => {
+    const d = new Date()
+    d.setDate(d.getDate() - Math.floor(Math.random() * daysBack))
+    return d
+  }
 
-  const pengadaan = [
-    { kode: `TRX-PENGADAAN-${dateStr}-001`, mb: 'ELE-001', qty: 2, status: 'approved', space: 8, date: isoDate, appBy: kepsekUser.id },
-    { kode: `TRX-PENGADAAN-${dateStr}-002`, mb: 'APE-001', qty: 5, status: 'pending', space: 1, date: isoDate },
-    { kode: `TRX-PENGADAAN-${dateStr}-003`, mb: 'ART-002', qty: 3, status: 'rejected', space: 10, date: isoDate, appBy: kepsekUser.id },
-    { kode: `TRX-PENGADAAN-${dateStr}-004`, mb: 'KES-001', qty: 1, status: 'approved', space: 8, date: isoDate, appBy: kepsekUser.id },
-  ]
+  // 9. Create Transaksi Barang (25 records)
+  console.log('📦 Seeding 25 Transaksi Barang...')
+  for (let i = 1; i <= 25; i++) {
+    const status = ['approved', 'pending', 'rejected'][i % 3]
+    const isApproved = status === 'approved'
+    const isRejected = status === 'rejected'
 
-  for (const p of pengadaan) {
     await prisma.transaksiBarang.create({
       data: {
-        kodeTransaksi: p.kode,
-        masterBarangId: p.mb,
-        tanggalTransaksi: new Date(p.date),
-        totalPesanan: p.qty,
-        penanggungJawab: 'Mas Budi',
+        kodeTransaksi: `TRX-IN-${String(i).padStart(3, '0')}`,
+        masterBarangId: allMasterKeys[i % allMasterKeys.length],
+        tanggalTransaksi: getRandomDate(),
+        totalPesanan: Math.floor(Math.random() * 10) + 1,
+        penanggungJawab: ['Mas Budi', 'Ibu Ratna', 'Pak Eko'][i % 3],
         userId: petugasUser.id,
-        approvalStatus: p.status as any,
-        approvedBy: p.appBy,
-        approvedAt: p.appBy ? new Date(p.date) : null,
-        ruangTujuanId: p.space
+        approvalStatus: status as any,
+        approvedBy: (isApproved || isRejected) ? kepsekUser.id : null,
+        approvedAt: (isApproved || isRejected) ? getRandomDate(5) : null,
+        ruangTujuanId: (i % 12) + 1
       }
     })
   }
-  console.log('✅ Sync Transaksi Barang created')
 
-  // 10. Create Transaksi Keluar (Sync with auto-gen pattern)
-  const keluar = [
-    { kode: `TRX-ASET-${dateStr}-001`, unit: 'APE01-IND-1', type: 'peminjaman', status: 'approved', from: 1, to: 2, date: isoDate, appBy: adminUser.id },
-    { kode: `TRX-ASET-${dateStr}-002`, unit: 'TKA-MJA-1', type: 'pemindahan', status: 'pending', from: 2, to: 7, date: isoDate },
-    { kode: `TRX-ASET-${dateStr}-003`, unit: 'SPK-GYM-01', type: 'peminjaman', status: 'approved', from: 10, to: 6, date: isoDate, appBy: kepsekUser.id },
-  ]
+  // 10. Create Transaksi Keluar (25 records)
+  console.log('📤 Seeding 25 Transaksi Keluar...')
+  const types = ['pemindahan', 'peminjaman', 'penggunaan', 'penghapusan']
+  for (let i = 1; i <= 25; i++) {
+    const unit = createdUnits[i % createdUnits.length]
+    const status = i % 5 === 0 ? 'pending' : 'approved'
 
-  for (const o of keluar) {
     await prisma.transaksiKeluar.create({
       data: {
-        kodeTransaksi: o.kode,
-        unitBarangId: o.unit,
-        ruangAsalId: o.from,
-        ruangTujuanId: o.to,
-        tipe: o.type as any,
-        tanggalTransaksi: new Date(o.date),
-        penerima: 'Staf Pengajar',
+        kodeTransaksi: `TRX-OUT-${String(i).padStart(3, '0')}`,
+        unitBarangId: unit.kodeUnit,
+        ruangAsalId: unit.ruangId,
+        ruangTujuanId: (unit.ruangId % 12) + 1,
+        tipe: types[i % types.length] as any,
+        tanggalTransaksi: getRandomDate(),
+        penerima: ['Guru Kelas', 'Staf TU', 'Yayasan'][i % 3],
         userId: petugasUser.id,
-        approvalStatus: o.status as any,
-        approvedBy: o.appBy,
-        approvedAt: o.appBy ? new Date(o.date) : null
+        approvalStatus: status as any,
+        approvedBy: status === 'approved' ? adminUser.id : null,
+        approvedAt: status === 'approved' ? getRandomDate(5) : null
       }
     })
   }
-  console.log('✅ Sync Transaksi Keluar created')
 
-  // 11. Broken Items & Mutations
-  const lastMonth = new Date(now)
-  lastMonth.setMonth(now.getMonth() - 1)
-  const twoMonthsAgo = new Date(now)
-  twoMonthsAgo.setMonth(now.getMonth() - 2)
+  // 11. Barang Rusak (25 records)
+  console.log('⚠️ Seeding 25 Barang Rusak...')
+  for (let i = 1; i <= 25; i++) {
+    const unit = createdUnits[(i * 2) % createdUnits.length]
+    await prisma.barangRusak.create({
+      data: {
+        unitBarangId: unit.kodeUnit,
+        ruangId: unit.ruangId,
+        tanggalKejadian: getRandomDate(30),
+        keterangan: ['Pecah', 'Lecet parah', 'Hilang komponen', 'Baut lepas', 'Kain robek'][i % 5],
+        penanggungJawab: 'Petugas Kebersihan',
+        userId: petugasUser.id
+      }
+    })
+  }
 
-  await prisma.barangRusak.createMany({
-    data: [
-      { unitBarangId: 'APE02-PZL-6', ruangId: 2, tanggalKejadian: lastMonth, keterangan: 'Pecah saat dimainkan', penanggungJawab: 'Ibu Ratna', userId: petugasUser.id },
-      { unitBarangId: 'TKA-KRS-5', ruangId: 2, tanggalKejadian: twoMonthsAgo, keterangan: 'Baut lepas', penanggungJawab: 'Mas Budi', userId: petugasUser.id },
-    ]
-  })
+  // 12. Mutasi Lokasi (25 records)
+  console.log('🔄 Seeding 25 Mutasi Lokasi...')
+  for (let i = 1; i <= 25; i++) {
+    const unit = createdUnits[(i * 3) % createdUnits.length]
+    await prisma.mutasiLokasi.create({
+      data: {
+        unitBarangId: unit.kodeUnit,
+        ruangAsalId: (unit.ruangId % 12) + 1,
+        ruangTujuanId: unit.ruangId,
+        tanggalMutasi: getRandomDate(90),
+        tipeMutasi: i % 2 === 0 ? 'transaksi' : 'manual',
+        keterangan: 'Penataan ulang aset rutin',
+        userId: petugasUser.id
+      }
+    })
+  }
 
-  await prisma.mutasiLokasi.create({
-    data: {
-      unitBarangId: 'TV-TKB-01',
-      ruangAsalId: 7,
-      ruangTujuanId: 3,
-      tanggalMutasi: twoMonthsAgo,
-      tipeMutasi: 'manual',
-      keterangan: 'Pemasangan awal di TKB',
-      userId: petugasUser.id
-    }
-  })
   console.log('✅ Final broken reports & Mutation logs created')
   console.log('\n🎉 Seeding Completed Successfully!')
 }

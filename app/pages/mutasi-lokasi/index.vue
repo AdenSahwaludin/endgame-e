@@ -22,21 +22,19 @@ interface MutasiLokasiResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'mutasi-lokasi-list',
-  () => $fetch<MutasiLokasiResponse>('/api/mutasi-lokasi', {
-    query: {
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-      search: search.value,
-      page: page.value,
-      limit: 20,
-      startDate: startDate.value || undefined,
-      endDate: endDate.value || undefined,
-    }
-  }),
-  { watch: [page, search, sortBy, sortOrder, startDate, endDate] }
-);
+const { data, refresh } = await useFetch<MutasiLokasiResponse>('/api/mutasi-lokasi', {
+  query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    search: search.value,
+    page: page.value,
+    limit: 20,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
+  })),
+  key: 'mutasi-lokasi-list',
+  watch: [page, search, sortBy, sortOrder, startDate, endDate]
+});
 
 const { data: units } = await useFetch("/api/unit-barang", {
   query: { limit: 500, activeOnly: "true" },
@@ -115,7 +113,7 @@ const columns: any[] = [
   },
   { id: "dari", accessorKey: "ruangAsal.namaRuang", header: "Dari" },
   { id: "ke", accessorKey: "ruangTujuan.namaRuang", header: "Ke" },
-  { id: "tipe", accessorKey: "tipeMutasi", header: "Tipe" },
+  { id: "tipe", accessorKey: "tipeMutasi", header: "Tipe", sortable: true },
   { id: "tanggal", accessorKey: "tanggalMutasi", header: "Tanggal", sortable: true },
   { id: "user", accessorKey: "user.name", header: "User" },
 ];

@@ -22,20 +22,18 @@ interface MasterBarangResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'master-barang-list',
-  () => $fetch<MasterBarangResponse>('/api/master-barang', {
-    query: {
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-      search: search.value,
-      page: page.value,
-      limit: 20,
-      kategoriId: kategoriFilter.value || undefined,
-    }
-  }),
-  { watch: [page, search, kategoriFilter, sortBy, sortOrder] }
-);
+const { data, refresh } = await useFetch<MasterBarangResponse>('/api/master-barang', {
+  query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    search: search.value,
+    page: page.value,
+    limit: 20,
+    kategoriId: kategoriFilter.value || undefined,
+  })),
+  key: 'master-barang-list',
+  watch: [page, search, kategoriFilter, sortBy, sortOrder]
+});
 
 const columns = computed(() => {
   const cols: any[] = [

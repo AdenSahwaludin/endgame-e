@@ -18,8 +18,8 @@ export default defineEventHandler(async (event) => {
     ];
   }
 
-  // Handle special sorting for 'valuasi' (Unit Aktif * Harga Satuan)
-  if (sortBy === 'valuasi') {
+  // Handle special sorting for 'valuasi' or 'stok' (calculated fields)
+  if (sortBy === 'valuasi' || sortBy === 'stok') {
     const allData = await prisma.masterBarang.findMany({
       where,
       include: {
@@ -29,8 +29,17 @@ export default defineEventHandler(async (event) => {
     });
 
     const sortedData = allData.sort((a, b) => {
-      const valA = (a._count?.unitBarang || 0) * (Number(a.hargaSatuan) || 0);
-      const valB = (b._count?.unitBarang || 0) * (Number(b.hargaSatuan) || 0);
+      let valA = 0;
+      let valB = 0;
+
+      if (sortBy === 'valuasi') {
+        valA = (a._count?.unitBarang || 0) * (Number(a.hargaSatuan) || 0);
+        valB = (b._count?.unitBarang || 0) * (Number(b.hargaSatuan) || 0);
+      } else {
+        valA = a._count?.unitBarang || 0;
+        valB = b._count?.unitBarang || 0;
+      }
+
       return sortOrder === 'asc' ? valA - valB : valB - valA;
     });
 

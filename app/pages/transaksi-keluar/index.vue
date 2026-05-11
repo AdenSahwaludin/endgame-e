@@ -22,22 +22,20 @@ interface TransaksiKeluarResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'transaksi-keluar-list',
-  () => $fetch<TransaksiKeluarResponse>('/api/transaksi-keluar', {
-    query: {
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-      search: search.value,
-      page: page.value,
-      limit: 20,
-      status: statusFilter.value || undefined,
-      startDate: startDate.value || undefined,
-      endDate: endDate.value || undefined,
-    }
-  }),
-  { watch: [page, search, statusFilter, sortBy, sortOrder, startDate, endDate] }
-);
+const { data, refresh } = await useFetch<TransaksiKeluarResponse>('/api/transaksi-keluar', {
+  query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    search: search.value,
+    page: page.value,
+    limit: 20,
+    status: statusFilter.value || undefined,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
+  })),
+  key: 'transaksi-keluar-list',
+  watch: [page, search, statusFilter, sortBy, sortOrder, startDate, endDate]
+});
 
 const columns = [
   { id: "kode", accessorKey: "kodeTransaksi", header: "Kode", sortable: true },

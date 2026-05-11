@@ -68,9 +68,10 @@ button:disabled,
 
 /* Premium Jelly Button Animation & Styling */
 .btn-jelly {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease !important;
   position: relative;
   overflow: hidden;
+  will-change: transform;
 }
 
 .btn-soft {
@@ -82,41 +83,10 @@ button:disabled,
 }
 
 .btn-jelly:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px color-mix(in oklab, currentColor 30%, transparent);
-}
-
-@keyframes jelly {
-  0% {
-    transform: scale(1, 1);
-  }
-
-  30% {
-    transform: scale(1.15, 0.85);
-  }
-
-  40% {
-    transform: scale(0.85, 1.15);
-  }
-
-  50% {
-    transform: scale(1.1, 0.9);
-  }
-
-  65% {
-    transform: scale(0.95, 1.05);
-  }
-
-  75% {
-    transform: scale(1.05, 0.95);
-  }
-
-  100% {
-    transform: scale(1, 1);
-  }
+  filter: brightness(1.1);
 }
 
 .btn-jelly:active {
-  animation: jelly 0.5s ease-in-out both;
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.92);
+  transition: transform 0.1s ease-out !important;
 }

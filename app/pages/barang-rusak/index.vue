@@ -28,21 +28,19 @@ interface BarangRusakResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'barang-rusak-list',
-  () => $fetch<BarangRusakResponse>('/api/barang-rusak', {
-    query: {
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-      search: search.value,
-      page: page.value,
-      limit: 20,
-      startDate: startDate.value || undefined,
-      endDate: endDate.value || undefined,
-    }
-  }),
-  { watch: [page, search, sortBy, sortOrder, startDate, endDate] }
-);
+const { data, refresh } = await useFetch<BarangRusakResponse>('/api/barang-rusak', {
+  query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    search: search.value,
+    page: page.value,
+    limit: 20,
+    startDate: startDate.value || undefined,
+    endDate: endDate.value || undefined,
+  })),
+  key: 'barang-rusak-list',
+  watch: [page, search, sortBy, sortOrder, startDate, endDate]
+});
 
 const form = ref({
   unitBarangId: "",

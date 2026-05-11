@@ -23,19 +23,17 @@ interface RuangResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'ruang-list',
-  () => $fetch<RuangResponse>('/api/ruang', {
-    query: {
-      search: search.value,
-      page: page.value,
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-      limit: 20,
-    }
-  }),
-  { watch: [page, search, sortBy, sortOrder] }
-);
+const { data, refresh } = await useFetch<RuangResponse>('/api/ruang', {
+  query: computed(() => ({
+    search: search.value,
+    page: page.value,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    limit: 20,
+  })),
+  key: 'ruang-list',
+  watch: [page, search, sortBy, sortOrder]
+});
 
 const columns = [
   { id: "id", accessorKey: "id", header: "ID" },

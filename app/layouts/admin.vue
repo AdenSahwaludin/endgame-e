@@ -126,7 +126,18 @@ const navigation = computed(() => {
     to: "/akun",
   });
 
-  return [dashboardGroup, masterGroup, transaksiGroup, pengaturanGroup].filter(
+  const laporanGroup = {
+    label: "LAPORAN",
+    items: [] as Array<{ label: string; icon: string; to: string }>,
+  };
+  if (hasPermission("generate_laporan"))
+    laporanGroup.items.push({
+      label: "Laporan",
+      icon: "i-heroicons-document-chart-bar",
+      to: "/laporan",
+    });
+
+  return [dashboardGroup, masterGroup, transaksiGroup, laporanGroup, pengaturanGroup].filter(
     (group) => group.items.length > 0,
   );
 });

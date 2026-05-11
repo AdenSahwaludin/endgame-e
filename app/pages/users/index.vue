@@ -17,19 +17,17 @@ interface UsersResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'users-list',
-  () => $fetch<UsersResponse>('/api/users', {
-    query: {
-      search: search.value,
-      page: page.value,
-      limit: 20,
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-    }
-  }),
-  { watch: [page, search, sortBy, sortOrder] }
-);
+const { data, refresh } = await useFetch<UsersResponse>('/api/users', {
+  query: computed(() => ({
+    search: search.value,
+    page: page.value,
+    limit: 20,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+  })),
+  key: 'users-list',
+  watch: [page, search, sortBy, sortOrder]
+});
 
 const form = ref({
   name: "",

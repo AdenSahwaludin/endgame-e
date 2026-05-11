@@ -23,21 +23,19 @@ interface UnitBarangResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'unit-barang-list',
-  () => $fetch<UnitBarangResponse>('/api/unit-barang', {
-    query: {
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-      search: search.value,
-      page: page.value,
-      limit: 20,
-      status: statusFilter.value || undefined,
-      activeOnly: 'false',
-    }
-  }),
-  { watch: [page, search, statusFilter, sortBy, sortOrder] }
-);
+const { data, refresh } = await useFetch<UnitBarangResponse>('/api/unit-barang', {
+  query: computed(() => ({
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    search: search.value,
+    page: page.value,
+    limit: 20,
+    status: statusFilter.value || undefined,
+    activeOnly: 'false',
+  })),
+  key: 'unit-barang-list',
+  watch: [page, search, statusFilter, sortBy, sortOrder]
+});
 
 // Scroll to top on page change
 watch(page, () => {

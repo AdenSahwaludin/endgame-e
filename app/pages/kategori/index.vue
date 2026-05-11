@@ -23,19 +23,17 @@ interface KategoriResponse {
   limit: number;
 }
 
-const { data, refresh } = await useAsyncData(
-  'kategori-list',
-  () => $fetch<KategoriResponse>('/api/kategori', {
-    query: {
-      search: search.value,
-      page: page.value,
-      sortBy: sortBy.value,
-      sortOrder: sortOrder.value,
-      limit: 20,
-    }
-  }),
-  { watch: [page, search, sortBy, sortOrder] }
-);
+const { data, refresh } = await useFetch<KategoriResponse>('/api/kategori', {
+  query: computed(() => ({
+    search: search.value,
+    page: page.value,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    limit: 20,
+  })),
+  key: 'kategori-list',
+  watch: [page, search, sortBy, sortOrder]
+});
 
 const columns = [
   { id: "kode", accessorKey: "kodeKategori", header: "Kode", sortable: true },

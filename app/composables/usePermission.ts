@@ -47,6 +47,7 @@ export function usePermission() {
       "edit_mutasi_lokasis",
       "delete_mutasi_lokasis",
       "create_barang_rusaks",
+      "generate_laporan",
     ],
   };
 
