@@ -114,6 +114,12 @@ const navigation = computed(() => {
       icon: "i-heroicons-clipboard-document-list",
       to: "/log-aktivitas",
     });
+  if (isAdmin())
+    pengaturanGroup.items.push({
+      label: "Sistem",
+      icon: "i-heroicons-cog-8-tooth",
+      to: "/pengaturan/sistem",
+    });
   if (hasPermission("view_users"))
     pengaturanGroup.items.push({
       label: "Users",
