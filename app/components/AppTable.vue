@@ -39,7 +39,7 @@ function handleSort(key: string) {
       <div 
         v-if="col.sortable !== false && col.id !== 'actions' && (col.accessorKey || col.id)" 
         class="group flex items-center gap-1.5 cursor-pointer select-none hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200" 
-        @click="handleSort(col.id)"
+        @click="handleSort(col.accessorKey || col.id)"
       >
         <span class="font-semibold">{{ col.header }}</span>
         <div class="flex items-center">

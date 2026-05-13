@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   const masterBarangId = query.masterBarangId as string;
   const activeOnly = query.activeOnly !== "false";
   const page = parseInt(query.page as string) || 1;
-  const sortBy = (query.sortBy as string) || "createdAt";
+  const sortBy = (query.sortBy as string) || "kodeUnit";
   const sortMap: Record<string, string> = {
     "kode": "kodeUnit",
     "barang": "masterBarang.namaBarang",
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     "createdAt": "createdAt"
   };
   const orderByField = sortMap[sortBy] || sortBy;
-  const sortOrder = (query.sortOrder as string) === "asc" ? "asc" : "desc";
+  const sortOrder = (query.sortOrder as string) === "desc" ? "desc" : "asc";
   const limit = parseInt(query.limit as string) || 20;
 
   const where: any = {};

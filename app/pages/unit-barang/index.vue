@@ -4,8 +4,8 @@ const toast = useToast();
 const { hasPermission } = usePermission();
 const search = ref("");
 const page = ref(1);
-const sortBy = ref("createdAt");
-const sortOrder = ref("desc");
+const sortBy = ref("kodeUnit");
+const sortOrder = ref("asc");
 const statusFilter = ref<string | null>(null);
 
 watch(search, () => {

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const search = (query.search as string) || "";
   const page = parseInt(query.page as string) || 1;
-  const sortBy = (query.sortBy as string) || "createdAt";
+  const sortBy = (query.sortBy as string) || "kodeKategori";
   const sortMap: Record<string, string> = {
     kode: "kodeKategori",
     nama: "namaKategori",

@@ -10,8 +10,8 @@ export default defineEventHandler(async (event) => {
   const where: any = { deletedAt: null };
   if (search) where.namaRuang = { contains: search };
 
-  const sortBy = (query.sortBy as string) || "createdAt";
-  const sortOrder = (query.sortOrder as string) === "asc" ? "asc" : "desc";
+  const sortBy = (query.sortBy as string) || "id";
+  const sortOrder = (query.sortOrder as string) === "desc" ? "desc" : "asc";
 
   if (all) {
     return prisma.ruang.findMany({ where, orderBy: buildOrderBy(sortBy, sortOrder) });

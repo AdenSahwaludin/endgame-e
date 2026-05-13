@@ -29,6 +29,7 @@ export default defineEventHandler(async (event) => {
     }
     const sortMap: Record<string, string> = {
       kode: 'kodeUnit',
+      kodeUnit: 'kodeUnit',
       barang: 'masterBarang.namaBarang',
       kategori: 'masterBarang.kategori.namaKategori',
       ruang: 'ruang.namaRuang',
@@ -74,7 +75,9 @@ export default defineEventHandler(async (event) => {
     }
     const sortMap: Record<string, string> = {
       tanggal: 'tanggalTransaksi',
+      tanggalTransaksi: 'tanggalTransaksi',
       kode: 'kodeTransaksi',
+      kodeTransaksi: 'kodeTransaksi',
       tipe: 'tipe',
       barang: 'unitBarang.masterBarang.namaBarang',
       kategori: 'unitBarang.masterBarang.kategori.namaKategori',
@@ -119,7 +122,9 @@ export default defineEventHandler(async (event) => {
     }
     const sortMap: Record<string, string> = {
       tanggal: 'tanggalKejadian',
+      tanggalKejadian: 'tanggalKejadian',
       unit: 'unitBarangId',
+      unitBarangId: 'unitBarangId',
       barang: 'unitBarang.masterBarang.namaBarang',
       kategori: 'unitBarang.masterBarang.kategori.namaKategori',
       ruang: 'ruang.namaRuang',

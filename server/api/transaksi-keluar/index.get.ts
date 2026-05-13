@@ -3,6 +3,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const search = (query.search as string) || "";
   const status = query.status as string;
+  const tipe = query.tipe as string;
   const page = parseInt(query.page as string) || 1;
     const sortBy = (query.sortBy as string) || "createdAt";
   const sortMap: Record<string, string> = {
@@ -19,6 +20,7 @@ export default defineEventHandler(async (event) => {
 
   const where: any = {};
   if (status) where.approvalStatus = status;
+  if (tipe) where.tipe = tipe;
   if (search) {
     where.OR = [
       { kodeTransaksi: { contains: search } },

@@ -44,9 +44,11 @@ export default defineEventHandler(async (event) => {
   const sortMap: Record<string, string> = {
     tanggal: 'tanggalTransaksi',
     kode: 'kodeTransaksi',
+    kodeTransaksi: 'kodeTransaksi',
     barang: 'masterBarang.namaBarang',
     kategori: 'masterBarang.kategori.namaKategori',
     jumlah: 'totalPesanan',
+    totalPesanan: 'totalPesanan',
     harga: 'masterBarang.hargaSatuan',
     total: 'calculated_total', // Placeholder for in-memory sort
     createdAt: 'createdAt',

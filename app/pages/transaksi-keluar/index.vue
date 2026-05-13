@@ -7,11 +7,12 @@ const page = ref(1);
 const sortBy = ref("createdAt");
 const sortOrder = ref("desc");
 const statusFilter = ref<string | null>(null);
+const tipeFilter = ref<string | null>(null);
 
 const startDate = ref("");
 const endDate = ref("");
 
-watch([search, statusFilter, startDate, endDate], () => {
+watch([search, statusFilter, tipeFilter, startDate, endDate], () => {
   page.value = 1;
 });
 
@@ -30,11 +31,12 @@ const { data, refresh } = await useFetch<TransaksiKeluarResponse>('/api/transaks
     page: page.value,
     limit: 20,
     status: statusFilter.value || undefined,
+    tipe: tipeFilter.value || undefined,
     startDate: startDate.value || undefined,
     endDate: endDate.value || undefined,
   })),
   key: 'transaksi-keluar-list',
-  watch: [page, search, statusFilter, sortBy, sortOrder, startDate, endDate]
+  watch: [page, search, statusFilter, tipeFilter, sortBy, sortOrder, startDate, endDate]
 });
 
 const columns = [
@@ -154,6 +156,21 @@ async function handleReturn(id: number) {
         icon="i-heroicons-magnifying-glass"
         class="max-w-sm"
       />
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tipe:</span>
+        <USelectMenu
+          v-model="tipeFilter"
+          :items="[
+            { label: 'Semua', value: null },
+            { label: 'Peminjaman', value: 'peminjaman' },
+            { label: 'Penggunaan', value: 'penggunaan' },
+            { label: 'Pemindahan', value: 'pemindahan' },
+            { label: 'Penghapusan', value: 'penghapusan' },
+          ]"
+          value-key="value"
+          class="w-40"
+        />
+      </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
         <USelectMenu

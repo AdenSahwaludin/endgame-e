@@ -132,6 +132,7 @@ async function handleSubmit() {
                 :items="ruangOptions"
                 value-key="value"
                 class="w-full"
+                placeholder="Pilih Ruang"
             /></UFormField>
             <UFormField label="Jumlah" class="w-28"
               ><UInput

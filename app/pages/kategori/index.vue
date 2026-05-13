@@ -5,12 +5,43 @@ const { hasPermission } = usePermission();
 
 const search = ref("");
 const page = ref(1);
-const sortBy = ref("createdAt");
-const sortOrder = ref("desc");
+const sortBy = ref("kodeKategori");
+const sortOrder = ref("asc");
 const showModal = ref(false);
 const editMode = ref(false);
 const form = ref({ kodeKategori: "", namaKategori: "", deskripsi: "" });
 const loading = ref(false);
+
+const isCustomCode = ref(false);
+
+const kodeError = computed(() => {
+  if (!isCustomCode.value && !editMode.value) return false;
+  if (!form.value.kodeKategori) return false;
+  if (form.value.kodeKategori.length < 2) return "Minimal 2 karakter";
+  if (form.value.kodeKategori.length > 10) return "Maksimal 10 karakter";
+  if (!/^[A-Z0-9-]+$/.test(form.value.kodeKategori)) return "Hanya boleh huruf kapital, angka, dan tanda hubung";
+  
+  // Simple uniqueness check against current list
+  const isDuplicate = data.value?.data?.some(k => 
+    k.kodeKategori === form.value.kodeKategori && 
+    (!editMode.value || k.kodeKategori !== form.value.kodeKategori)
+  );
+  if (isDuplicate && !editMode.value) return "Kode sudah digunakan dalam daftar ini";
+  
+  return false;
+});
+
+watch(isCustomCode, (val) => {
+  if (!val && !editMode.value) {
+    form.value.kodeKategori = "";
+  }
+});
+
+watch(() => form.value.kodeKategori, (newVal) => {
+  if (newVal) {
+    form.value.kodeKategori = newVal.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+  }
+});
 
 watch(search, () => {
   page.value = 1;
@@ -44,12 +75,14 @@ const columns = [
 
 function openCreate() {
   editMode.value = false;
+  isCustomCode.value = false;
   form.value = { kodeKategori: "", namaKategori: "", deskripsi: "" };
   showModal.value = true;
 }
 
 function openEdit(item: any) {
   editMode.value = true;
+  isCustomCode.value = true;
   form.value = {
     kodeKategori: item.kodeKategori,
     namaKategori: item.namaKategori,
@@ -59,6 +92,14 @@ function openEdit(item: any) {
 }
 
 async function handleSubmit() {
+  if (kodeError.value) {
+    toast.add({
+      title: "Validasi Gagal",
+      description: kodeError.value,
+      color: "error",
+    });
+    return;
+  }
   loading.value = true;
   try {
     if (editMode.value) {
@@ -182,6 +223,31 @@ async function handleDelete(id: string) {
             </h3>
           </template>
           <form @submit.prevent="handleSubmit" class="space-y-4">
+            <UFormField 
+              label="Kode Kategori" 
+              :error="kodeError"
+            >
+              <template #label>
+                <div class="flex items-center space-x-4">
+                  <span>Kode Kategori</span>
+                  <UCheckbox 
+                    v-if="!editMode" 
+                    v-model="isCustomCode" 
+                    label="Custom ID" 
+                    class="text-xs font-normal"
+                  />
+                </div>
+              </template>
+              <UInput
+                v-model="form.kodeKategori"
+                :placeholder="isCustomCode ? 'Masukkan kode kategori' : 'Otomatis (berdasarkan nama)'"
+                class="w-full"
+                :disabled="editMode || !isCustomCode"
+              />
+              <template #help v-if="isCustomCode">
+                Kode unik kategori (2-10 karakter). Contoh: ELE, MFB, APE.
+              </template>
+            </UFormField>
             <UFormField label="Nama Kategori">
               <UInput
                 v-model="form.namaKategori"

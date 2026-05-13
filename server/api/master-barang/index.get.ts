@@ -5,8 +5,8 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const search = (query.search as string) || "";
   const page = parseInt(query.page as string) || 1;
-  const sortBy = (query.sortBy as string) || "createdAt";
-  const sortOrder = (query.sortOrder as string) === "asc" ? "asc" : "desc";
+  const sortBy = (query.sortBy as string) || "kodeMaster";
+  const sortOrder = (query.sortOrder as string) === "desc" ? "desc" : "asc";
   const limit = parseInt(query.limit as string) || 20;
 
   const where: any = { deletedAt: null };
@@ -19,7 +19,8 @@ export default defineEventHandler(async (event) => {
   }
 
   // Handle special sorting for 'valuasi' or 'stok' (calculated fields)
-  if (sortBy === 'valuasi' || sortBy === 'stok') {
+  if (sortBy === 'valuasi' || sortBy === 'stok' || sortBy === 'unitBarang._count') {
+    const sortField = sortBy === 'valuasi' ? 'valuasi' : 'stok';
     const allData = await prisma.masterBarang.findMany({
       where,
       include: {

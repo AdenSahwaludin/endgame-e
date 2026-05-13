@@ -7,8 +7,8 @@ const { formatRupiah } = useCurrency();
 const { hasPermission, isAdmin, isKepsek } = usePermission();
 const search = ref("");
 const page = ref(1);
-const sortBy = ref('createdAt');
-const sortOrder = ref('desc');
+const sortBy = ref('kodeMaster');
+const sortOrder = ref('asc');
 const kategoriFilter = ref("");
 
 watch(search, () => {

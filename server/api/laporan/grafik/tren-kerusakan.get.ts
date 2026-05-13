@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
   const monthlyCounts = Array(12).fill(0)
   reports.forEach(r => {
-    const month = new Date(r.tanggalKejadian).getMonth()
+    const month = new Date(r.tanggalKejadian!).getMonth()
     monthlyCounts[month] += 1
   })
 
