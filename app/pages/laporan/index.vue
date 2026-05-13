@@ -227,18 +227,75 @@ async function exportData(format: 'pdf' | 'csv') {
       const autoTable = (await import('jspdf-autotable')).default;
       const doc = new jsPDF();
       
-      doc.setFontSize(16);
-      doc.text(`Laporan ${activeTab.value === 'stok' ? 'Stok Fisik' : 'Keuangan'}`, 14, 15);
-      doc.setFontSize(10);
-      doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 22);
+      // 1. Tambahkan Logo
+      try {
+        const img = new Image();
+        img.src = '/Logo Tk Teratai.png';
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+        doc.addImage(img, 'PNG', 15, 8, 25, 25);
+      } catch (e) {
+        console.error('Gagal memuat logo:', e);
+      }
 
+      // 2. Kop Surat (Teks Tengah)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('YAYASAN PENDIDIKAN TERATAI', 110, 15, { align: 'center' });
+      
+      doc.setFontSize(16);
+      doc.text('TK TERATAI Kota Cirebon', 110, 22, { align: 'center' });
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text('NPSN: 20265773', 110, 27, { align: 'center' });
+      
+      doc.setFontSize(9);
+      doc.text('Jl. Teratai No. 24 BTN Kalijaga Permai Barat, RT 05 / RW 11, Kel. Kalijaga,', 110, 32, { align: 'center' });
+      doc.text('Kec. Harjamukti, Kota Cirebon, Jawa Barat 45144', 110, 36, { align: 'center' });
+      doc.text('Email: tkterataicrb@gmail.com', 110, 40, { align: 'center' });
+      
+      // 3. Garis Pemisah (Double Line style)
+      doc.setLineWidth(0.8);
+      doc.line(15, 43, 195, 43);
+      doc.setLineWidth(0.2);
+      doc.line(15, 44.2, 195, 44.2);
+      
+      // 4. Judul Laporan & Periode (Format Lebih Ringkas & Profesional)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('LAPORAN INVENTARIS', 105, 52, { align: 'center' });
+      
+      const subTitle = activeTab.value === 'stok' ? 
+        (stokTipe.value === 'unit' ? 'Stok Fisik Barang' : (stokTipe.value === 'transaksi_keluar' ? 'Pengelolaan Aset' : 'Barang Rusak')) : 
+        'Laporan Keuangan';
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const tp = month >= 7 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`${subTitle} - Tahun Pelajaran ${tp}`, 105, 58, { align: 'center' });
+      
+      // 5. Metadata Cetak
+      doc.setFontSize(8);
+      doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 65);
+
+      // 6. Tabel Data
       autoTable(doc, {
         head: [head],
         body: body,
-        startY: 25,
+        startY: 70,
         theme: 'grid',
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [41, 128, 185] },
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [41, 128, 185], halign: 'center' },
+        columnStyles: {
+          // Center align some columns if needed
+        }
       });
 
       doc.save(filename);
