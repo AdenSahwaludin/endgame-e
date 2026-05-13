@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import { prisma } from '~/server/utils/prisma'
+import { prisma } from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
   const userId = await requireAuth(event)
