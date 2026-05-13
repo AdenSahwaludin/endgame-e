@@ -8,8 +8,13 @@ export default defineEventHandler(async (event) => {
   const id = parseInt(getRouterParam(event, 'id') || '')
   if (!id) throw createError({ statusCode: 400, statusMessage: 'ID User tidak valid' })
 
-  const body = await readBody(event)
-  const newPassword = body.password || 'Password123!' // Default password if not provided
+  let newPassword = 'Password123!'
+  try {
+    const body = await readBody(event)
+    if (body?.password) newPassword = body.password
+  } catch (e) {
+    // Ignore error if body is empty
+  }
   
   const user = await prisma.user.findUnique({ where: { id } })
   if (!user) throw createError({ statusCode: 404, statusMessage: 'User tidak ditemukan' })
