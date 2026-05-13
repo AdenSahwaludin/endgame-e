@@ -95,9 +95,9 @@ const navigation = computed(() => {
       icon: "i-heroicons-arrow-up-tray",
       to: "/transaksi-keluar",
     });
-  if (hasPermission("view_barang_rusaks"))
+    if (hasPermission("view_barang_rusaks"))
     transaksiGroup.items.push({
-      label: "Barang Rusak",
+      label: "Barang Rusak/Hilang",
       icon: "i-heroicons-exclamation-triangle",
       to: "/barang-rusak",
     });

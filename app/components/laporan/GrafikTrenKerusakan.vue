@@ -17,7 +17,7 @@ const chartData = computed(() => {
   return {
     labels: data.value.map(d => d.label),
     datasets: [{
-      label: 'Laporan Kerusakan',
+      label: 'Laporan Kerusakan/Kehilangan',
       data: data.value.map(d => d.count),
       borderColor: '#ef4444',
       backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -44,7 +44,7 @@ const chartOptions = {
     <div class="flex items-center justify-between mb-6">
       <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
         <UIcon name="i-heroicons-exclamation-circle" class="w-4 h-4 text-error-500" />
-        Tren Laporan Barang Rusak
+        Tren Laporan Barang Rusak/Hilang
       </h3>
     </div>
     <div class="h-64">

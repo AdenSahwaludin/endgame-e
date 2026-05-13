@@ -129,7 +129,6 @@ function tipeColor(t: string) {
   return (map[t] || 'neutral') as any;
 }
 
-// Computed active columns based on stokTipe
 const activeStokColumns = computed(() => {
   if (stokTipe.value === 'unit') return columnsUnit.value;
   if (stokTipe.value === 'transaksi_keluar') return columnsTransaksiKeluar.value;
@@ -186,8 +185,6 @@ async function exportData(format: 'pdf' | 'csv') {
             r.ruang?.namaRuang || '-', r.status, r.isActive ? 'Aktif' : 'Nonaktif'
           ]);
        } else if (stokTipe.value === 'transaksi_keluar') {
-          head = ['Kode Transaksi', 'Nama Barang', 'Tipe', 'Tanggal', 'Penerima', 'Status'];
-          body = rawData.map((r: any) => [
             r.kodeTransaksi, r.unitBarang?.masterBarang?.namaBarang, r.tipe,
             formatDate(r.tanggalTransaksi), r.penerima || '-', r.approvalStatus
           ]);
@@ -269,7 +266,7 @@ async function exportData(format: 'pdf' | 'csv') {
       doc.text('LAPORAN INVENTARIS', 105, 52, { align: 'center' });
       
       const subTitle = activeTab.value === 'stok' ? 
-        (stokTipe.value === 'unit' ? 'Stok Fisik Barang' : (stokTipe.value === 'transaksi_keluar' ? 'Pengelolaan Aset' : 'Barang Rusak')) : 
+        (stokTipe.value === 'unit' ? 'Stok Fisik Barang' : (stokTipe.value === 'transaksi_keluar' ? 'Pengelolaan Aset' : 'Barang Rusak/Hilang')) : 
         'Laporan Keuangan';
 
       const now = new Date();
@@ -382,7 +379,7 @@ async function exportData(format: 'pdf' | 'csv') {
           v-for="item in [
             { label: 'Inventaris Barang', value: 'unit', icon: 'i-heroicons-cube' },
             { label: 'Pengelolaan Aset', value: 'transaksi_keluar', icon: 'i-heroicons-arrow-up-tray' },
-            { label: 'Barang Rusak', value: 'barang_rusak', icon: 'i-heroicons-exclamation-triangle' },
+            { label: 'Barang Rusak/Hilang', value: 'barang_rusak', icon: 'i-heroicons-exclamation-triangle' },
           ]"
           :key="item.value"
           :icon="item.icon"

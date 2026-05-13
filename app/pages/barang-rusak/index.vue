@@ -104,7 +104,7 @@ async function handleSubmit() {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Barang Rusak
+        Barang Rusak/Hilang
       </h2>
       <UButton
         v-if="hasPermission('create_barang_rusaks')"
@@ -157,7 +157,7 @@ async function handleSubmit() {
       <template #content>
         <UCard>
           <template #header
-            ><h3 class="text-lg font-semibold">Lapor Barang Rusak</h3></template
+            ><h3 class="text-lg font-semibold">Lapor Barang Rusak/Hilang</h3></template
           >
           <form @submit.prevent="handleSubmit" class="space-y-4">
             <UFormField label="Unit Barang"
