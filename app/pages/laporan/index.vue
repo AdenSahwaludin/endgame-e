@@ -129,6 +129,7 @@ function tipeColor(t: string) {
   return (map[t] || 'neutral') as any;
 }
 
+// Computed active columns based on stokTipe
 const activeStokColumns = computed(() => {
   if (stokTipe.value === 'unit') return columnsUnit.value;
   if (stokTipe.value === 'transaksi_keluar') return columnsTransaksiKeluar.value;
@@ -185,6 +186,8 @@ async function exportData(format: 'pdf' | 'csv') {
             r.ruang?.namaRuang || '-', r.status, r.isActive ? 'Aktif' : 'Nonaktif'
           ]);
        } else if (stokTipe.value === 'transaksi_keluar') {
+          head = ['Kode Transaksi', 'Nama Barang', 'Tipe', 'Tanggal', 'Penerima', 'Status'];
+          body = rawData.map((r: any) => [
             r.kodeTransaksi, r.unitBarang?.masterBarang?.namaBarang, r.tipe,
             formatDate(r.tanggalTransaksi), r.penerima || '-', r.approvalStatus
           ]);

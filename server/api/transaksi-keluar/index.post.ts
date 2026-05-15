@@ -12,24 +12,60 @@ export default defineEventHandler(async (event) => {
 
   const kodeTransaksi = await generateKodeTransaksiKeluar()
 
-  const transaksi = await prisma.transaksiKeluar.create({
-    data: {
-      kodeTransaksi,
-      unitBarangId: body.unitBarangId,
-      ruangAsalId: unit.ruangId,
-      ruangTujuanId: body.ruangTujuanId || null,
-      tipe: body.tipe,
-      tanggalTransaksi: body.tanggalTransaksi ? new Date(body.tanggalTransaksi) : new Date(),
-      penerima: body.penerima || null,
-      tujuan: body.tujuan || null,
-      keterangan: body.keterangan || null,
-      catatan: body.catatan || null,
-      userId,
-      approvalStatus: 'pending',
-    },
-    include: { unitBarang: true },
+  const transaksi = await prisma.$transaction(async (tx) => {
+    const t = await tx.transaksiKeluar.create({
+      data: {
+        kodeTransaksi,
+        unitBarangId: body.unitBarangId,
+        ruangAsalId: unit.ruangId,
+        ruangTujuanId: body.ruangTujuanId || null,
+        tipe: body.tipe,
+        tanggalTransaksi: body.tanggalTransaksi ? new Date(body.tanggalTransaksi) : new Date(),
+        penerima: body.penerima || null,
+        tujuan: body.tujuan || null,
+        keterangan: body.keterangan || null,
+        catatan: body.catatan || null,
+        userId,
+        approvalStatus: 'approved',
+        approvedBy: userId,
+        approvedAt: new Date(),
+      },
+      include: { unitBarang: true },
+    })
+
+    // Langsung update status unit sesuai tipe (logic dari approve.post.ts)
+    if (body.tipe === 'pemindahan' && body.ruangTujuanId) {
+      await tx.unitBarang.update({
+        where: { kodeUnit: body.unitBarangId },
+        data: { ruangId: body.ruangTujuanId, status: 'baik' },
+      })
+      await tx.mutasiLokasi.create({
+        data: {
+          unitBarangId: body.unitBarangId,
+          ruangAsalId: unit.ruangId,
+          ruangTujuanId: body.ruangTujuanId,
+          tanggalMutasi: new Date(),
+          userId,
+          tipeMutasi: 'transaksi_keluar',
+          keterangan: `Pemindahan via ${kodeTransaksi}`,
+        },
+      })
+    } else if (body.tipe === 'penghapusan') {
+      await tx.unitBarang.update({
+        where: { kodeUnit: body.unitBarangId },
+        data: { status: 'dihapus', isActive: false },
+      })
+    } else {
+      // peminjaman / penggunaan → status dipinjam
+      await tx.unitBarang.update({
+        where: { kodeUnit: body.unitBarangId },
+        data: { status: 'dipinjam' },
+      })
+    }
+
+    return t
   })
 
-  await logAktivitas({ userId, jenis: 'create', deskripsi: `Pengelolaan aset ${kodeTransaksi} dibuat`, namaTabel: 'transaksi_keluar', recordId: String(transaksi.id) })
+  await logAktivitas({ userId, jenis: 'create', deskripsi: `Pengelolaan aset ${kodeTransaksi} dibuat (Otomatis Approved)`, namaTabel: 'transaksi_keluar', recordId: String(transaksi.id) })
   return transaksi
 })

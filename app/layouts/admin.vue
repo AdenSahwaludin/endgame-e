@@ -162,13 +162,13 @@ const navigation = computed(() => {
       <div
         class="flex items-center gap-3 px-4 py-5 border-b border-gray-200/80 dark:border-gray-800/80"
       >
-        <div
-          class="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold text-sm shrink-0"
-        >
-          TK
-        </div>
-        <span v-if="sidebarOpen" class="font-bold text-lg truncate"
-          >TKT Inventaris</span
+        <img
+          src="/Logo Tk Teratai.png"
+          alt="Logo TK Teratai"
+          class="w-8 h-8 object-contain shrink-0 drop-shadow-sm"
+        />
+        <span v-if="sidebarOpen" class="font-bold text-lg truncate text-primary-600 dark:text-primary-400"
+          >TK Teratai</span
         >
       </div>
 
@@ -247,7 +247,7 @@ const navigation = computed(() => {
       >
         <div>
           <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
-            Sistem Inventaris TKT
+            Sistem Inventaris TK Teratai
           </h1>
         </div>
         <div class="flex items-center gap-3">

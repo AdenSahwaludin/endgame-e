@@ -172,20 +172,6 @@ async function handleReturn(id: number) {
         />
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
-        <USelectMenu
-          v-model="statusFilter"
-          :items="[
-            { label: 'Semua', value: null },
-            { label: 'Pending', value: 'pending' },
-            { label: 'Approved', value: 'approved' },
-            { label: 'Rejected', value: 'rejected' },
-          ]"
-          value-key="value"
-          class="w-36"
-        />
-      </div>
-      <div class="flex items-center gap-2">
         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rentang:</span>
         <UInput v-model="startDate" type="date" class="w-40" />
         <span class="text-gray-500">-</span>
@@ -215,28 +201,6 @@ async function handleReturn(id: number) {
       <template #user-cell="{ row }">{{ row.original.user?.name }}</template>
       <template #actions-cell="{ row }">
         <div class="flex gap-1">
-          <template
-            v-if="row.original.approvalStatus === 'pending' && canApprove()"
-          >
-            <UButton
-              icon="i-heroicons-check"
-              label="Setujui"
-              color="success"
-              variant="ghost"
-              size="xs"
-              class="btn-jelly btn-soft"
-              @click="handleApprove(row.original.id)"
-            />
-            <UButton
-              icon="i-heroicons-x-mark"
-              label="Tolak"
-              color="error"
-              variant="ghost"
-              size="xs"
-              class="btn-jelly btn-soft"
-              @click="handleReject(row.original.id)"
-            />
-          </template>
           <UButton
             v-if="
               row.original.approvalStatus === 'approved' &&

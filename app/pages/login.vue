@@ -38,16 +38,19 @@ async function handleLogin() {
     <div class="mx-auto w-full max-w-5xl">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         <div class="text-center lg:text-left">
-          <div
-            class="w-16 h-16 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold text-2xl mx-auto lg:mx-0 mb-4 shadow-lg"
-          >
-            TK
-          </div>
+          <img
+            src="/Logo Tk Teratai.png"
+            alt="Logo TK Teratai"
+            class="w-24 h-24 mx-auto lg:mx-0 mb-6 drop-shadow-md"
+          />
           <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
-            TKT Inventaris
+            Sistem Inventaris
           </h1>
-          <p class="text-gray-500 dark:text-gray-400 mt-3 text-lg">
-            Sistem Manajemen Inventaris Warehouse
+          <h2 class="text-3xl font-bold text-primary-600 dark:text-primary-400 mt-1">
+            TK Teratai
+          </h2>
+          <p class="text-gray-500 dark:text-gray-400 mt-3 text-lg max-w-md mx-auto lg:mx-0">
+            Kelola data barang, pengadaan, dan aset sekolah dengan mudah dan terstruktur.
           </p>
         </div>
 
@@ -98,7 +101,7 @@ async function handleLogin() {
       </div>
 
       <p class="text-center text-xs text-gray-400 mt-6">
-        © 2026 TKT Warehouse Inventory System
+        © 2026 TK Teratai Kota Cirebon. All rights reserved.
       </p>
     </div>
   </div>

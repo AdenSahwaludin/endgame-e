@@ -104,7 +104,7 @@ async function handleSubmit() {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Barang Rusak/Hilang
+        Barang Rusak
       </h2>
       <UButton
         v-if="hasPermission('create_barang_rusaks')"
@@ -157,7 +157,7 @@ async function handleSubmit() {
       <template #content>
         <UCard>
           <template #header
-            ><h3 class="text-lg font-semibold">Lapor Barang Rusak/Hilang</h3></template
+            ><h3 class="text-lg font-semibold">Lapor Barang Rusak</h3></template
           >
           <form @submit.prevent="handleSubmit" class="space-y-4">
             <UFormField label="Unit Barang"
@@ -166,6 +166,7 @@ async function handleSubmit() {
                 :items="unitOptions"
                 value-key="value"
                 searchable
+                placeholder="Pilih Unit Barang"
                 class="w-full"
             /></UFormField>
             <UFormField label="Tanggal Kejadian"
@@ -175,10 +176,10 @@ async function handleSubmit() {
                 class="w-full"
             /></UFormField>
             <UFormField label="Keterangan"
-              ><UTextarea v-model="form.keterangan" class="w-full"
+              ><UTextarea v-model="form.keterangan" placeholder="Keterangan" class="w-full"
             /></UFormField>
             <UFormField label="Penanggung Jawab"
-              ><UInput v-model="form.penanggungJawab" class="w-full"
+              ><UInput v-model="form.penanggungJawab" placeholder="Penanggung Jawab" class="w-full"
             /></UFormField>
             <div class="flex justify-end gap-2">
               <UButton variant="ghost" @click="showCreate = false"
