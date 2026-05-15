@@ -3,7 +3,7 @@ import { prisma } from '../../utils/prisma'
 export default defineEventHandler(async (event) => {
   const userId = await requireAuth(event)
   await requirePermission(event, PERMISSIONS.BACKUP_DATABASE)
-  
+
   const files = await readMultipartFormData(event)
   if (!files || files.length === 0) {
     throw createError({ statusCode: 400, statusMessage: 'File backup tidak ditemukan' })
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   const backupFile = files[0]
   let backupContent: any
-  
+
   try {
     backupContent = JSON.parse(backupFile.data.toString())
   } catch (e) {
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   // Restore logic: Delete all current data and insert from backup
   // Urutan penghapusan penting karena foreign key (terbalik dari dependensi)
   // Catatan: Ini adalah operasi destruktif
-  
+
   try {
     await prisma.$transaction(async (tx) => {
       // 1. Delete current data
@@ -61,19 +61,19 @@ export default defineEventHandler(async (event) => {
       if (d.logAktivitas?.length) await tx.logAktivitas.createMany({ data: d.logAktivitas })
     })
 
-    await logAktivitas({ 
-      userId, 
-      jenis: 'update', 
-      deskripsi: `Sistem di-restore dari file ${backupFile.filename} oleh Admin`, 
-      namaTabel: 'system' 
+    await logAktivitas({
+      userId,
+      jenis: 'update',
+      deskripsi: `Sistem di-restore dari file ${backupFile.filename} oleh Admin`,
+      namaTabel: 'system'
     })
 
     return { message: 'Data sistem berhasil dipulihkan' }
   } catch (error: any) {
     console.error('Restore error:', error)
-    throw createError({ 
-      statusCode: 500, 
-      statusMessage: `Gagal memulihkan data: ${error.message}` 
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Gagal memulihkan data: ${error.message}`
     })
   }
 })

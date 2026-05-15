@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe - Manajemen User</title>
+    <style>
+        * { box-sizing: border-box; border-radius: 0 !important; box-shadow: none !important; font-family: 'Courier New', Courier, monospace; }
+        body { margin: 0; padding: 0; display: flex; height: 100vh; background-color: #fff; color: #000; overflow: hidden; }
+        aside { width: 250px; border-right: 1px solid #000; display: flex; flex-direction: column; background: #fff; }
+        .brand { padding: 20px; border-bottom: 1px solid #000; font-weight: bold; text-align: center; font-size: 1.2em; background: #fff; }
+        nav { flex-grow: 1; }
+        nav ul { list-style: none; padding: 0; margin: 0; }
+        nav ul li { border-bottom: 1px solid #000; }
+        nav ul li a { display: block; padding: 15px 20px; text-decoration: none; color: #000; background: #fff; font-weight: bold; }
+        nav ul li a.active { background: #eee; text-decoration: underline; border-left: 5px solid #000; }
+        .wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        header { height: 60px; border-bottom: 1px solid #000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #fff; }
+        main { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+        .user-form { border: 1px solid #000; padding: 20px; background: #fff; }
+        .user-list { border: 1px solid #000; padding: 20px; background: #fff; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .form-group label { font-size: 12px; font-weight: bold; }
+        .form-group input, .form-group select { border: 1px solid #000; padding: 8px; font-family: inherit; background: #fff; }
+        .btn { border: 1px solid #000; padding: 10px 20px; background: #fff; cursor: pointer; font-weight: bold; }
+        .btn-thick { border: 2px solid #000; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { border: 1px solid #000; padding: 10px; text-align: left; }
+        table th { background: #fff; font-size: 12px; border-bottom: 2px solid #000; }
+    </style>
+</head>
+<body>
+    <aside>
+        <div class="brand">INV-SYSTEM</div>
+        <nav>
+            <ul>
+                <li><a href="dashboard.html">DASHBOARD</a></li>
+                <li><a href="data_barang.html">DATA BARANG</a></li>
+                <li><a href="pengadaan_barang.html">PENGADAAN BARANG</a></li>
+                <li><a href="pengelolaan_barang.html">PENGELOLAAN BARANG</a></li>
+                <li><a href="laporan.html">LAPORAN</a></li>
+                <li><a href="pengguna.html" class="active">MANAJEMEN USER</a></li>
+            </ul>
+        </nav>
+    </aside>
+    <div class="wrapper">
+        <header>
+            <div style="font-weight: bold;">PENGATURAN USER</div>
+            <button class="btn">[KELUAR]</button>
+        </header>
+        <main>
+            <div class="grid-layout">
+                <div class="user-form">
+                    <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px;">FORM USER</h3>
+                    <div class="form-group">
+                        <label>USERNAME</label>
+                        <input type="text" placeholder="...">
+                    </div>
+                    <div class="form-group">
+                        <label>ROLE</label>
+                        <select>
+                            <option>ADMIN</option>
+                            <option>STAFF</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-thick" style="width: 100%;">SIMPAN DATA</button>
+                </div>
+                <div class="user-list">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>USER</th>
+                                <th>ROLE</th>
+                                <th>AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>admin_1</td>
+                                <td>ADMIN</td>
+                                <td>[EDIT] [HAPUS]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

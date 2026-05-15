@@ -46,7 +46,7 @@ const columns = [
   { id: "tanggal", accessorKey: "tanggalTransaksi", header: "Tanggal", sortable: true },
   { id: "status", accessorKey: "approvalStatus", header: "Status" },
   { id: "user", accessorKey: "user.name", header: "Dibuat Oleh" },
-  { id: "actions", header: "Aksi" },
+  { id: "actions", header: "Aksi", class: "w-10 text-center" },
 ];
 
 const statusColor = (s: string) =>
@@ -180,6 +180,9 @@ async function handleReturn(id: number) {
     </div>
 
     <AppTable :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
+      <template #actions-header>
+        <div class="text-center w-full">Aksi</div>
+      </template>
       <template #unit-cell="{ row }">{{
         row.original.unitBarang?.kodeUnit
       }}</template>
@@ -200,7 +203,7 @@ async function handleReturn(id: number) {
       >
       <template #user-cell="{ row }">{{ row.original.user?.name }}</template>
       <template #actions-cell="{ row }">
-        <div class="flex gap-1">
+        <div class="flex justify-center">
           <UButton
             v-if="
               row.original.approvalStatus === 'approved' &&
@@ -214,6 +217,7 @@ async function handleReturn(id: number) {
             variant="ghost"
             size="xs"
             class="btn-jelly btn-soft"
+            title="Kembalikan"
             @click="handleReturn(row.original.id)"
           />
         </div>

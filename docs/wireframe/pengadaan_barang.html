@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe - Pengadaan Barang</title>
+    <style>
+        * { box-sizing: border-box; border-radius: 0 !important; box-shadow: none !important; font-family: 'Courier New', Courier, monospace; }
+        body { margin: 0; padding: 0; display: flex; height: 100vh; background-color: #fff; color: #000; overflow: hidden; }
+        aside { width: 250px; border-right: 1px solid #000; display: flex; flex-direction: column; background: #fff; }
+        .brand { padding: 20px; border-bottom: 1px solid #000; font-weight: bold; text-align: center; font-size: 1.2em; background: #fff; }
+        nav { flex-grow: 1; }
+        nav ul { list-style: none; padding: 0; margin: 0; }
+        nav ul li { border-bottom: 1px solid #000; }
+        nav ul li a { display: block; padding: 15px 20px; text-decoration: none; color: #000; background: #fff; font-weight: bold; }
+        nav ul li a.active { background: #eee; text-decoration: underline; border-left: 5px solid #000; }
+        .wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        header { height: 60px; border-bottom: 1px solid #000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #fff; }
+        main { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        .form-container { border: 1px solid #000; padding: 20px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 12px; font-weight: bold; }
+        .form-group input, .form-group select { border: 1px solid #000; padding: 8px; font-family: inherit; background: #fff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table th, table td { border: 1px solid #000; padding: 10px; text-align: left; }
+        table th { background: #fff; font-size: 12px; border-bottom: 2px solid #000; }
+        .btn { border: 1px solid #000; padding: 10px 20px; background: #fff; cursor: pointer; font-weight: bold; }
+        .btn-thick { border: 2px solid #000; }
+    </style>
+</head>
+<body>
+    <aside>
+        <div class="brand">INV-SYSTEM</div>
+        <nav>
+            <ul>
+                <li><a href="dashboard.html">DASHBOARD</a></li>
+                <li><a href="data_barang.html">DATA BARANG</a></li>
+                <li><a href="pengadaan_barang.html" class="active">PENGADAAN BARANG</a></li>
+                <li><a href="pengelolaan_barang.html">PENGELOLAAN BARANG</a></li>
+                <li><a href="laporan.html">LAPORAN</a></li>
+                <li><a href="pengguna.html">MANAJEMEN USER</a></li>
+            </ul>
+        </nav>
+    </aside>
+    <div class="wrapper">
+        <header>
+            <div style="font-weight: bold;">PENGADAAN / STOK MASUK</div>
+            <button class="btn">[SIMPAN]</button>
+        </header>
+        <main>
+            <div class="form-container">
+                <div class="form-group">
+                    <label>NOMOR PENGADAAN</label>
+                    <input type="text" value="PRC-20231027-001" readonly>
+                </div>
+                <div class="form-group">
+                    <label>TANGGAL PENGADAAN</label>
+                    <input type="date">
+                </div>
+                <div class="form-group">
+                    <label>SUMBER DANA / SUPPLIER</label>
+                    <select>
+                        <option>-- PILIH OPSI --</option>
+                        <option>PT. LOREM IPSUM</option>
+                        <option>DANA HIBAH</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>KETERANGAN</label>
+                    <input type="text" placeholder="...">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" placeholder="KODE BARANG..." style="flex-grow: 1; border: 1px solid #000; padding: 10px;">
+                <button class="btn btn-thick">+ TAMBAH ITEM</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>KODE</th>
+                        <th>NAMA ITEM</th>
+                        <th>QTY</th>
+                        <th>SATUAN</th>
+                        <th>AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>BRG-001</td>
+                        <td>LOREM IPSUM BARANG A</td>
+                        <td><input type="number" value="10" style="width: 60px; border: 1px solid #000; padding: 5px;"></td>
+                        <td>PCS</td>
+                        <td>[BATAL]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>
