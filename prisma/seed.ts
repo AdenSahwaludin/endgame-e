@@ -41,6 +41,41 @@ async function main() {
     })
   }
 
+  // Kepala Sekolah: Specific perms
+  const kepsekPermNames = [
+    'view_kategoris', 'view_ruangs', 'view_master_barangs', 'view_unit_barangs',
+    'view_transaksi_barangs', 'view_transaksi_keluars', 'view_barang_rusaks', 'view_mutasi_lokasis',
+    'view_log_aktivitas', 'view_users', 'approve_transaksi_barangs', 'approve_transaksi_keluars',
+    'generate_laporan', 'export_data'
+  ]
+  const kepsekPerms = allPerms.filter(p => kepsekPermNames.includes(p.name))
+  for (const perm of kepsekPerms) {
+    await prisma.rolePermission.upsert({
+      where: { roleId_permissionId: { roleId: kepsekRole.id, permissionId: perm.id } },
+      update: {},
+      create: { roleId: kepsekRole.id, permissionId: perm.id },
+    })
+  }
+
+  // Petugas Inventaris: Specific perms
+  const petugasPermNames = [
+    'view_kategoris', 'view_ruangs', 'view_master_barangs', 'view_unit_barangs',
+    'view_transaksi_barangs', 'view_transaksi_keluars', 'view_barang_rusaks', 'view_mutasi_lokasis',
+    'view_log_aktivitas', 'create_kategoris', 'edit_kategoris', 'delete_kategoris',
+    'create_ruangs', 'edit_ruangs', 'delete_ruangs', 'create_master_barangs', 'edit_master_barangs',
+    'create_unit_barangs', 'edit_unit_barangs', 'create_transaksi_barangs', 'edit_transaksi_barangs',
+    'create_transaksi_keluars', 'edit_transaksi_keluars', 'create_mutasi_lokasis', 'edit_mutasi_lokasis',
+    'delete_mutasi_lokasis', 'create_barang_rusaks', 'generate_laporan'
+  ]
+  const petugasPerms = allPerms.filter(p => petugasPermNames.includes(p.name))
+  for (const perm of petugasPerms) {
+    await prisma.rolePermission.upsert({
+      where: { roleId_permissionId: { roleId: petugasRole.id, permissionId: perm.id } },
+      update: {},
+      create: { roleId: petugasRole.id, permissionId: perm.id },
+    })
+  }
+
   // 3. Users
   const hashedPassword = await bcrypt.hash('password', 12)
   const adminUser = await prisma.user.upsert({
