@@ -160,6 +160,302 @@ const exportLoading = ref(false);
 async function exportData(format: 'pdf' | 'csv') {
   exportLoading.value = true;
   try {
+    if (activeTab.value === 'visualisasi') {
+      if (format === 'csv') {
+        toast.add({
+          title: 'Format CSV Tidak Didukung',
+          description: 'Laporan visualisasi hanya dapat diekspor ke format PDF.',
+          color: 'warning'
+        });
+        exportLoading.value = false;
+        return;
+      }
+
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
+      const doc = new jsPDF();
+
+      // Fetch all visual data in parallel
+      let statusData: any[] = [];
+      let kategoriData: any[] = [];
+      let ruangData: any[] = [];
+      let trenPengadaanData: any[] = [];
+      let trenKerusakanData: any[] = [];
+      let tipeKeluarData: any[] = [];
+      let statusPeminjamanData: any[] = [];
+      let pengeluaranBulananData: any[] = [];
+      let pengeluaranKategoriData: any[] = [];
+
+      const promises = [
+        $fetch('/api/laporan/grafik/status-barang').then(res => statusData = res as any[]).catch(() => []),
+        $fetch('/api/laporan/grafik/barang-per-kategori').then(res => kategoriData = res as any[]).catch(() => []),
+        $fetch('/api/laporan/grafik/barang-per-ruang').then(res => ruangData = res as any[]).catch(() => []),
+        $fetch('/api/laporan/grafik/tren-pengadaan').then(res => trenPengadaanData = res as any[]).catch(() => []),
+        $fetch('/api/laporan/grafik/tren-kerusakan').then(res => trenKerusakanData = res as any[]).catch(() => []),
+        $fetch('/api/laporan/grafik/tipe-transaksi-keluar').then(res => tipeKeluarData = res as any[]).catch(() => []),
+        $fetch('/api/laporan/grafik/status-peminjaman').then(res => statusPeminjamanData = res as any[]).catch(() => []),
+      ];
+
+      if (isAdmin() || isKepsek()) {
+        promises.push(
+          $fetch('/api/laporan/grafik/pengeluaran-bulanan').then(res => pengeluaranBulananData = res as any[]).catch(() => []),
+          $fetch('/api/laporan/grafik/pengeluaran-per-kategori').then(res => pengeluaranKategoriData = res as any[]).catch(() => []),
+        );
+      }
+
+      await Promise.all(promises);
+
+      // Helper function to draw header/kop on any page
+      const drawHeader = (d: any) => {
+        try {
+          const img = new Image();
+          img.src = '/Logo Tk Teratai.png';
+          d.addImage(img, 'PNG', 15, 8, 25, 25);
+        } catch (e) {
+          console.error('Gagal memuat logo:', e);
+        }
+
+        d.setFont('helvetica', 'bold');
+        d.setFontSize(12);
+        d.text('YAYASAN PENDIDIKAN TERATAI', 110, 15, { align: 'center' });
+        
+        d.setFontSize(16);
+        d.text('TK TERATAI Kota Cirebon', 110, 22, { align: 'center' });
+        
+        d.setFont('helvetica', 'normal');
+        d.setFontSize(10);
+        d.text('NPSN: 20265773', 110, 27, { align: 'center' });
+        
+        d.setFontSize(9);
+        d.text('Jl. Teratai No. 24 BTN Kalijaga Permai Barat, RT 05 / RW 11, Kel. Kalijaga,', 110, 32, { align: 'center' });
+        d.text('Kec. Harjamukti, Kota Cirebon, Jawa Barat 45144', 110, 36, { align: 'center' });
+        d.text('Email: tkterataicrb@gmail.com', 110, 40, { align: 'center' });
+        
+        d.setLineWidth(0.8);
+        d.line(15, 43, 195, 43);
+        d.setLineWidth(0.2);
+        d.line(15, 44.2, 195, 44.2);
+      };
+
+      // PAGE 1: Komposisi & Status Inventaris
+      drawHeader(doc);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('LAPORAN EXECUTIVE SUMMARY & VISUALISASI DATA', 105, 52, { align: 'center' });
+      
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const tp = month >= 7 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(`Kondisi & Status Aset - Tahun Pelajaran ${tp}`, 105, 58, { align: 'center' });
+      
+      doc.setFontSize(8);
+      const { user } = useUserSession();
+      doc.text(`Dicetak oleh: ${user.value?.name || 'Staf'} | Tanggal: ${new Date().toLocaleString('id-ID')}`, 14, 65);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('1. KONDISI & STATUS INVENTARIS BARANG', 14, 73);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('1.1 Komposisi Status Barang Aktif', 14, 79);
+
+      const totalStatus = statusData.reduce((sum, item) => sum + item.count, 0);
+      const statusBody = statusData.map(item => [
+        item.status.charAt(0).toUpperCase() + item.status.slice(1),
+        `${item.count} unit`,
+        `${totalStatus > 0 ? ((item.count / totalStatus) * 100).toFixed(1) : 0}%`
+      ]);
+      statusBody.push(['Total Keseluruhan', `${totalStatus} unit`, '100%']);
+
+      autoTable(doc, {
+        head: [['Status Kondisi', 'Jumlah Aset', 'Persentase']],
+        body: statusBody,
+        startY: 82,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [16, 185, 129], halign: 'center' },
+      });
+
+      let currentY = (doc as any).lastAutoTable.finalY + 10;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('1.2 Distribusi Barang per Kategori (Top 5)', 14, currentY - 3);
+
+      kategoriData.sort((a, b) => b.count - a.count);
+      const topKategori = kategoriData.slice(0, 5);
+      const totalKategori = kategoriData.reduce((sum, item) => sum + item.count, 0);
+      const kategoriBody = topKategori.map(item => [
+        item.label,
+        `${item.count} unit`,
+        `${totalKategori > 0 ? ((item.count / totalKategori) * 100).toFixed(1) : 0}%`
+      ]);
+
+      autoTable(doc, {
+        head: [['Nama Kategori', 'Jumlah Aset', 'Proporsi']],
+        body: kategoriBody,
+        startY: currentY,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [41, 128, 185], halign: 'center' },
+      });
+
+      currentY = (doc as any).lastAutoTable.finalY + 10;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('1.3 Distribusi Barang per Lokasi Ruang (Top 5)', 14, currentY - 3);
+
+      ruangData.sort((a, b) => b.count - a.count);
+      const topRuang = ruangData.slice(0, 5);
+      const totalRuang = ruangData.reduce((sum, item) => sum + item.count, 0);
+      const ruangBody = topRuang.map(item => [
+        item.label,
+        `${item.count} unit`,
+        `${totalRuang > 0 ? ((item.count / totalRuang) * 100).toFixed(1) : 0}%`
+      ]);
+
+      autoTable(doc, {
+        head: [['Nama Lokasi Ruang', 'Jumlah Aset', 'Proporsi']],
+        body: ruangBody,
+        startY: currentY,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [99, 102, 241], halign: 'center' },
+      });
+
+      // PAGE 2: Analisis Keuangan (Hanya jika Admin/Kepsek) ATAU Tren Waktu
+      doc.addPage();
+      drawHeader(doc);
+
+      if (isAdmin() || isKepsek()) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('2. ANALISIS KEUANGAN & ANGGARAN PENGADAAN', 14, 53);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('2.1 Tren Pengeluaran Pengadaan Bulanan (Tahun Berjalan)', 14, 59);
+
+        const totalKeuangan = pengeluaranBulananData.reduce((sum, item) => sum + item.total, 0);
+        const bulananBody = pengeluaranBulananData.map(item => [
+          item.label,
+          formatRupiah(item.total)
+        ]);
+        bulananBody.push(['Total Pengadaan Tahunan', formatRupiah(totalKeuangan)]);
+
+        autoTable(doc, {
+          head: [['Bulan', 'Total Nominal Pengeluaran']],
+          body: bulananBody,
+          startY: 62,
+          theme: 'grid',
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [239, 68, 68], halign: 'center' },
+        });
+
+        currentY = (doc as any).lastAutoTable.finalY + 10;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('2.2 Akumulasi Pengeluaran Per Kategori Barang', 14, currentY - 3);
+
+        const totalKategoriUang = pengeluaranKategoriData.reduce((sum, item) => sum + item.total, 0);
+        const pengeluaranKatBody = pengeluaranKategoriData.map(item => [
+          item.label,
+          formatRupiah(item.total),
+          `${totalKategoriUang > 0 ? ((item.total / totalKategoriUang) * 100).toFixed(1) : 0}%`
+        ]);
+
+        autoTable(doc, {
+          head: [['Kategori Aset', 'Total Nominal', 'Persentase Anggaran']],
+          body: pengeluaranKatBody,
+          startY: currentY,
+          theme: 'grid',
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [245, 158, 11], halign: 'center' },
+        });
+
+        doc.addPage();
+        drawHeader(doc);
+      }
+
+      const startYContent = 53;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text((isAdmin() || isKepsek()) ? '3. TREN WAKTU & AKTIVITAS PENGELOLAAN ASET' : '2. TREN WAKTU & AKTIVITAS PENGELOLAAN ASET', 14, startYContent);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('3.1 Tren Penambahan Pengadaan Unit Barang', 14, startYContent + 6);
+
+      const trenPengadaanBody = trenPengadaanData.map(item => [
+        item.label,
+        `${item.count} unit`
+      ]);
+
+      autoTable(doc, {
+        head: [['Bulan', 'Jumlah Unit Didistribusikan']],
+        body: trenPengadaanBody,
+        startY: startYContent + 9,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [59, 130, 246], halign: 'center' },
+      });
+
+      currentY = (doc as any).lastAutoTable.finalY + 10;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('3.2 Tren Laporan Kerusakan Barang', 14, currentY - 3);
+
+      const trenKerusakanBody = trenKerusakanData.map(item => [
+        item.label,
+        `${item.count} laporan`
+      ]);
+
+      autoTable(doc, {
+        head: [['Bulan', 'Jumlah Kasus Kerusakan']],
+        body: trenKerusakanBody,
+        startY: currentY,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [100, 116, 139], halign: 'center' },
+      });
+
+      currentY = (doc as any).lastAutoTable.finalY + 10;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('3.3 Distribusi Penggunaan & Status Peminjaman Aset', 14, currentY - 3);
+
+      const combinedBody = [
+        ['Total Transaksi Keluar (Tipe Pemindahan)', `${tipeKeluarData.find(d => d.tipe === 'pemindahan')?.count || 0} kali`],
+        ['Total Transaksi Keluar (Tipe Peminjaman)', `${tipeKeluarData.find(d => d.tipe === 'peminjaman')?.count || 0} kali`],
+        ['Total Transaksi Keluar (Tipe Penggunaan)', `${tipeKeluarData.find(d => d.tipe === 'penggunaan')?.count || 0} kali`],
+        ['Total Transaksi Keluar (Tipe Penghapusan)', `${tipeKeluarData.find(d => d.tipe === 'penghapusan')?.count || 0} kali`],
+        ['Status Peminjaman Aktif', `${statusPeminjamanData.find(d => d.label === 'Aktif')?.count || 0} unit`],
+        ['Status Peminjaman Selesai', `${statusPeminjamanData.find(d => d.label === 'Selesai')?.count || 0} unit`],
+      ];
+
+      autoTable(doc, {
+        head: [['Metrik Pengelolaan Aset', 'Nilai Akumulasi']],
+        body: combinedBody,
+        startY: currentY,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [79, 70, 229], halign: 'center' },
+      });
+
+      doc.save(`laporan_visualisasi_${new Date().getTime()}.pdf`);
+      return;
+    }
+
     let endpoint = '';
     let queryParams: any = { export: 'true' };
 
@@ -300,7 +596,6 @@ async function exportData(format: 'pdf' | 'csv') {
 
       doc.save(filename);
     }
-
   } catch (error) {
     console.error('Export failed:', error);
     useToast().add({ title: 'Gagal Ekspor', description: 'Terjadi kesalahan saat mengunduh data.', color: 'error' });
