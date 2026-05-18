@@ -10,6 +10,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const backupFile = files[0]
+  if (!backupFile || !backupFile.data) {
+    throw createError({ statusCode: 400, statusMessage: 'File backup tidak valid atau kosong' })
+  }
+
   let backupContent: any
 
   try {
@@ -64,7 +68,7 @@ export default defineEventHandler(async (event) => {
     await logAktivitas({
       userId,
       jenis: 'update',
-      deskripsi: `Sistem di-restore dari file ${backupFile.filename} oleh Admin`,
+      deskripsi: `Sistem di-restore dari file ${backupFile.filename || 'backup'} oleh Admin`,
       namaTabel: 'system'
     })
 
