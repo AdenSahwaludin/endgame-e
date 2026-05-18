@@ -435,10 +435,10 @@ async function exportData(format: 'pdf' | 'csv') {
       doc.text('3.3 Distribusi Penggunaan & Status Peminjaman Aset', 14, currentY - 3);
 
       const combinedBody = [
-        ['Total Transaksi Keluar (Tipe Pemindahan)', `${tipeKeluarData.find(d => d.tipe === 'pemindahan')?.count || 0} kali`],
-        ['Total Transaksi Keluar (Tipe Peminjaman)', `${tipeKeluarData.find(d => d.tipe === 'peminjaman')?.count || 0} kali`],
-        ['Total Transaksi Keluar (Tipe Penggunaan)', `${tipeKeluarData.find(d => d.tipe === 'penggunaan')?.count || 0} kali`],
-        ['Total Transaksi Keluar (Tipe Penghapusan)', `${tipeKeluarData.find(d => d.tipe === 'penghapusan')?.count || 0} kali`],
+        ['Total Transaksi Keluar (Tipe Pemindahan)', `${tipeKeluarData.find(d => d.label === 'pemindahan')?.count || 0} kali`],
+        ['Total Transaksi Keluar (Tipe Peminjaman)', `${tipeKeluarData.find(d => d.label === 'peminjaman')?.count || 0} kali`],
+        ['Total Transaksi Keluar (Tipe Penggunaan)', `${tipeKeluarData.find(d => d.label === 'penggunaan')?.count || 0} kali`],
+        ['Total Transaksi Keluar (Tipe Penghapusan)', `${tipeKeluarData.find(d => d.label === 'penghapusan')?.count || 0} kali`],
         ['Status Peminjaman Aktif', `${statusPeminjamanData.find(d => d.label === 'Aktif')?.count || 0} unit`],
         ['Status Peminjaman Selesai', `${statusPeminjamanData.find(d => d.label === 'Selesai')?.count || 0} unit`],
       ];
