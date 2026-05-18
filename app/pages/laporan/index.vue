@@ -3,6 +3,7 @@ definePageMeta({ layout: 'admin', middleware: 'auth' });
 import { useCurrency } from '~/composables/useCurrency';
 const { formatRupiah } = useCurrency();
 const { isAdmin, isKepsek, hasPermission } = usePermission();
+const toast = useToast();
 
 // =====================
 // STATE
@@ -255,7 +256,7 @@ async function exportData(format: 'pdf' | 'csv') {
       
       doc.setFontSize(8);
       const { user } = useUserSession();
-      doc.text(`Dicetak oleh: ${user.value?.name || 'Staf'} | Tanggal: ${new Date().toLocaleString('id-ID')}`, 14, 65);
+      doc.text(`Dicetak oleh: ${(user.value as any)?.name || 'Staf'} | Tanggal: ${new Date().toLocaleString('id-ID')}`, 14, 65);
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
