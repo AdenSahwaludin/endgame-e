@@ -180,6 +180,7 @@ model BarangRusak {
   ruangId         Int?      @map("ruang_id")
   tanggalKejadian DateTime? @map("tanggal_kejadian") @db.Date
   tanggalRusak    DateTime? @map("tanggal_rusak") @db.Date
+  status          String    @default("dilaporkan")
   keterangan      String?
   penanggungJawab String?   @map("penanggung_jawab")
   userId          Int       @map("user_id")
