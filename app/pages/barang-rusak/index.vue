@@ -83,6 +83,7 @@ const unitOptions = computed(
 
 const columns = computed(() => {
   const cols: any[] = [
+    { id: "no", header: "No." },
     { id: "unit", accessorKey: "unitBarangId", header: "Unit" },
     {
       id: "barang",
@@ -188,6 +189,9 @@ async function handleSubmit() {
       </div>
     </div>
     <AppTable class="border border-gray-300 dark:border-gray-700 rounded-xl" :ui="{ base: 'min-w-[1000px]' }" :data="data?.data || []" :columns="columns" v-model:sortBy="sortBy" v-model:sortOrder="sortOrder">
+      <template #no-cell="{ row }">
+        <div class="whitespace-nowrap text-center">{{ (page - 1) * 20 + row.index + 1 }}</div>
+      </template>
       <template #barang-cell="{ row }">
         <div class="whitespace-nowrap">{{ row.original.unitBarang?.masterBarang?.namaBarang }}</div>
       </template>
